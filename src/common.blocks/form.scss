@@ -34,4 +34,27 @@
       color: lighten($primaryLight, 23%);
     }
   }
+
+  &__input_error {
+    border-color: $error;
+    outline-color: $error;
+  }
+
+  &__field-error {
+    display: none;
+    color: $error;
+    font-size: 1.2rem;
+    line-height: 1.2;
+    margin-top: 0.4rem;
+  }
+
+  &__field-error--show {
+    display: block;
+  }
+}
+
+.button_disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }

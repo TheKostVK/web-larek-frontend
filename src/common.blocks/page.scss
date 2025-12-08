@@ -8,6 +8,12 @@ html, body.page {
 	background: $background;
 }
 
+body.modal_open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
 .page__wrapper {
 	width: 100%;
 
