@@ -1,10 +1,9 @@
 import {
 	CartCheckRequest,
 	IModelProduct,
-	IProduct,
-} from '../../../types/components/products/model/modelProduct.interface';
+	IProduct, IViewProductModal,
+} from '../../../types';
 import { IEvents } from '../../base/events';
-import { IViewProductModal } from '../../../types/components/products/view/viewProductModal.interface';
 import { CART_EVENTS, PRODUCT_EVENTS, SYSTEM_EVENTS, SYSTEM_NAME_SPACE } from '../../../utils/constants';
 import { isProduct } from '../../../utils/utils';
 

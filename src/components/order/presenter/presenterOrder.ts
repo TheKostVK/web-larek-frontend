@@ -2,10 +2,8 @@ import {
 	IModelOrder,
 	IOrder,
 	PaymentMethod,
-	OrderStep,
-} from '../../../types/components/order/model/modelOrder.interface';
-import { IViewOrderModal } from '../../../types/components/order/view/viewOrderModal.interface';
-import { IOrderApi, IPostOrderResponse } from '../../../types/components/order/api/orederApi.interface';
+	OrderStep, IOrderApi, IViewOrderModal, IPostOrderResponse, IProduct,
+} from '../../../types';
 import { IEvents } from '../../base/events';
 import {
 	CART_EVENTS,
@@ -15,7 +13,6 @@ import {
 	SYSTEM_NAME_SPACE,
 } from '../../../utils/constants';
 import { isCart } from '../../../utils/utils';
-import { IProduct } from '../../../types/components/products/model/modelProduct.interface';
 
 class PresenterOrder {
 	constructor(

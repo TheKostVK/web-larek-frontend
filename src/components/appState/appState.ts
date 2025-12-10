@@ -1,11 +1,8 @@
-import { IModelProduct, IProduct } from '../../types/components/products/model/modelProduct.interface';
-import { IModelCart } from '../../types/components/cart/model/modelCart.interface';
-import { IModelOrder } from '../../types/components/order/model/modelOrder.interface';
-import { IAppState } from '../../types/components/appState/appState.interface';
+
 import { IEvents } from '../base/events';
-import { IProductApi } from '../../types/components/products/api/productApi.interface';
 import { CART_EVENTS, PRODUCT_EVENTS, settings, SYSTEM_EVENTS } from '../../utils/constants';
 import { isCart, isProduct } from '../../utils/utils';
+import { IAppState, IModelCart, IModelOrder, IModelProduct, IProduct, IProductApi } from '../../types';
 
 
 class AppState implements IAppState {

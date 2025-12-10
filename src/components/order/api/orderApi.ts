@@ -1,6 +1,5 @@
-import { IOrderApi, IPostOrderResponse } from '../../../types/components/order/api/orederApi.interface';
 import { Api } from '../../base/api';
-import { IOrder } from '../../../types/components/order/model/modelOrder.interface';
+import { IOrder, IOrderApi, IPostOrderResponse } from '../../../types';
 
 class OrderApi extends Api implements IOrderApi {
 	protected static readonly URI = 'order/';

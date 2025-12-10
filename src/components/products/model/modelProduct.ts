@@ -1,7 +1,4 @@
-import {
-	IProduct,
-	IModelProduct,
-} from '../../../types/components/products/model/modelProduct.interface';
+import { IModelProduct, IProduct } from '../../../types';
 
 class ModelProduct implements IModelProduct {
 	protected products: IProduct[] = [];

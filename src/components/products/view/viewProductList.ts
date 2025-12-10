@@ -1,6 +1,5 @@
-import { IViewProductList } from '../../../types/components/products/view/viewProductList.interface';
+import { IProduct, IViewProductList } from '../../../types';
 import { View } from '../../view/view';
-import { IProduct } from '../../../types/components/products/model/modelProduct.interface';
 import { cloneTemplate, getClassFromTag, getElementData, setElementData } from '../../../utils/utils';
 import { CDN_URL } from '../../../utils/constants';
 

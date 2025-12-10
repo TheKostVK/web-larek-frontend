@@ -1,9 +1,7 @@
-import { IModelCart } from '../../../types/components/cart/model/modelCart.interface';
 import { IEvents } from '../../base/events';
 import { CART_EVENTS, SYSTEM_EVENTS, SYSTEM_NAME_SPACE } from '../../../utils/constants';
 import { isProduct } from '../../../utils/utils';
-import { CartCheckRequest, IProduct } from '../../../types/components/products/model/modelProduct.interface';
-import { IViewCartModal } from '../../../types/components/cart/view/viewCartModal.interface';
+import { CartCheckRequest, IModelCart, IProduct, IViewCartModal } from '../../../types';
 
 class PresenterCart {
 	protected model: IModelCart;

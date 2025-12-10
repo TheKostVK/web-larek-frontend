@@ -1,4 +1,4 @@
-import { IView } from '../../types/components/view/view.interface';
+import { IView } from '../../types';
 import { ensureElement } from '../../utils/utils';
 
 /**

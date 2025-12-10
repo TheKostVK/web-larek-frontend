@@ -1,4 +1,4 @@
-import { IModelOrder, IOrder, PaymentMethod } from '../../../types/components/order/model/modelOrder.interface';
+import { IModelOrder, IOrder, PaymentMethod } from '../../../types';
 import { isPaymentMethod, isStringArray } from '../../../utils/utils';
 import { PAYMENT_METHODS, REG_EXP_EMAIL, REG_EXP_PHONE } from '../../../utils/constants';
 

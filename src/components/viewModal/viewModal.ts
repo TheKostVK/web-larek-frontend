@@ -1,5 +1,5 @@
 import { View } from '../view/view';
-import { IViewModal } from '../../types/components/viewModal/viewModal.interface';
+import { IViewModal } from '../../types';
 import { ensureElement, shouldCloseModalOnClick, shouldCloseModalOnKeyDown } from '../../utils/utils';
 
 abstract class ViewModal<S extends object> extends View<S> implements IViewModal<S> {

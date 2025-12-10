@@ -1,6 +1,5 @@
-import { IProduct } from '../../../types/components/products/model/modelProduct.interface';
 import { Api, ApiListResponse } from '../../base/api';
-import { IProductApi } from '../../../types/components/products/api/productApi.interface';
+import { IProduct, IProductApi } from '../../../types';
 
 /**
  * API для работы с товарами

@@ -1,7 +1,6 @@
-import { IModelProduct } from '../../../types/components/products/model/modelProduct.interface';
-import { IViewProductList } from '../../../types/components/products/view/viewProductList.interface';
 import { IEvents } from '../../base/events';
 import { PRODUCT_EVENTS } from '../../../utils/constants';
+import { IModelProduct, IViewProductList } from '../../../types';
 
 class PresenterProductList {
 	protected model: IModelProduct;

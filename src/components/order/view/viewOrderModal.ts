@@ -1,8 +1,7 @@
 import ViewModal from '../../viewModal/viewModal';
-import { IViewOrderModal } from '../../../types/components/order/view/viewOrderModal.interface';
 import { cloneTemplate, ensureElement, isOrder } from '../../../utils/utils';
-import { IOrder, OrderStep, PaymentMethod } from '../../../types/components/order/model/modelOrder.interface';
 import { DEFAULT_ORDER_STEP, PAYMENT_METHODS, REG_EXP_EMAIL, REG_EXP_PHONE } from '../../../utils/constants';
+import { IOrder, IViewOrderModal, OrderStep, PaymentMethod } from '../../../types';
 
 class ViewOrderModal extends ViewModal<IOrder> implements IViewOrderModal {
 	protected orderTemplate: HTMLTemplateElement | null = document.querySelector('#order');

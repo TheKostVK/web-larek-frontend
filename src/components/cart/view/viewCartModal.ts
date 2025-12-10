@@ -1,7 +1,6 @@
-import { ICart } from '../../../types/components/cart/model/modelCart.interface';
 import ViewModal from '../../viewModal/viewModal';
 import { cloneTemplate, ensureElement, getElementData, isCart, setElementData } from '../../../utils/utils';
-import { IViewCartModal } from '../../../types/components/cart/view/viewCartModal.interface';
+import { ICart, IViewCartModal } from '../../../types';
 
 class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 	protected cartTemplate: HTMLTemplateElement | null = document.querySelector('#basket');

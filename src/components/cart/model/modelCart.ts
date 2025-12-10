@@ -1,7 +1,6 @@
-import { ICart, IModelCart } from '../../../types/components/cart/model/modelCart.interface';
 import { isCart, isProduct } from '../../../utils/utils';
-import { IProduct } from '../../../types/components/products/model/modelProduct.interface';
 import { settings } from '../../../utils/constants';
+import { ICart, IModelCart, IProduct } from '../../../types';
 
 class ModelCart implements IModelCart {
 	protected cartData: ICart = {
@@ -33,7 +32,7 @@ class ModelCart implements IModelCart {
 
 		if (this.getItemById(itemId) === null) return;
 
-		this.cartData.items = this.cartData.items.filter(item => item.id !== item.id);
+		this.cartData.items = this.cartData.items.filter(item => item.id !== itemId);
 		this.cartData.itemsCount = this.cartData.items.length;
 		this.cartData.totalPrice = this.cartData.items.reduce<number>((acc, item) => acc + item.price, 0);
 

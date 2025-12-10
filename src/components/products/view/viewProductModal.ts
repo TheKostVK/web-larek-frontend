@@ -1,5 +1,4 @@
-import { IProduct } from '../../../types/components/products/model/modelProduct.interface';
-import { IViewProductModal } from '../../../types/components/products/view/viewProductModal.interface';
+import { IProduct, IViewProductModal } from '../../../types';
 import {
 	cloneTemplate,
 	ensureElement,
