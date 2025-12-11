@@ -1,16 +1,21 @@
-import { IProduct, IViewProductModal, ICardPreview } from '../../../types';
-import { ensureElement } from '../../../utils/utils';
+import { IProduct, IViewProductModal } from '../../../types';
 import ViewModal from '../../viewModal/viewModal';
+import { SELECTORS } from '../../../utils/constants';
 
+/**
+ * Класс представления модального окна товара
+ */
 class ViewProductModal extends ViewModal<IProduct> implements IViewProductModal {
 	protected onAddToCartCallback: (product: IProduct) => void | null = null;
-	protected inCart = false;
-	protected cardFactory: (product: IProduct, inCart?: boolean) => ICardPreview;
 
-	public constructor(cardFactory: (product: IProduct, inCart?: boolean) => ICardPreview) {
-		const modalContainer = ensureElement('#modal-container');
+	/**
+	 * Конструктор класса ViewProductModal
+	 * @param modalContainer {HTMLElement | string} - DOM-элемент или селектор контейнера модального окна
+	 */
+	public constructor(
+		modalContainer: HTMLElement | string = SELECTORS.IDS.MODAL_CONTAINER,
+	) {
 		super(modalContainer, {} as IProduct);
-		this.cardFactory = cardFactory;
 	}
 
 	public setOnAddToCartCallback(callback: (product: IProduct) => void): void {
@@ -22,29 +27,16 @@ class ViewProductModal extends ViewModal<IProduct> implements IViewProductModal 
 	}
 
 	public setInCartState(inCart: boolean): void {
-		if (typeof inCart !== 'boolean') return;
-
-		this.inCart = inCart;
 	}
 
-	public update(product: IProduct): void {
-		this.state = product;
-		
-		if (this.isMounted) {
-			this.render();
-		}
-	}
-
-	protected createModalContent(product: IProduct): HTMLElement {
-		const card = this.cardFactory(product, this.inCart);
-		card.render(product, this.inCart);
-		return card.getContainer();
+	public update(product: IProduct, content?: HTMLElement): void {
+		super.update(product, content);
 	}
 
 	protected clickAddToCartEvent = (evt: MouseEvent): void => {
 		if (!(evt.target instanceof HTMLElement)) return;
 
-		if (this.onAddToCartCallback && evt.target.classList.contains('card__button')) {
+		if (this.onAddToCartCallback && evt.target.classList.contains(SELECTORS.CARD.BUTTON_CLASS)) {
 			if (this.state.price !== null) {
 				this.onAddToCartCallback(this.state);
 			}
@@ -70,7 +62,7 @@ class ViewProductModal extends ViewModal<IProduct> implements IViewProductModal 
 			return;
 		}
 
-		const modalContent: HTMLElement = this.createModalContent(this.state);
+		const modalContent: HTMLElement = (this.renderData as HTMLElement) || document.createElement('div');
 		this.renderContent(modalContent);
 		this.setupCustomEventListeners();
 	}

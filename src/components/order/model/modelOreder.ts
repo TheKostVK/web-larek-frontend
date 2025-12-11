@@ -16,7 +16,6 @@ class ModelOrder implements IModelOrder {
 		if (!isStringArray(items)) return;
 
 		this.orderData.items = items;
-		this.orderData.total = items.length;
 	}
 
 	public setPaymentMethod(method: PaymentMethod): void {

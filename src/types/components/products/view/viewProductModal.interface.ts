@@ -5,8 +5,9 @@ export interface IViewProductModal extends IViewModal<IProduct> {
 	/**
 	 * Обновляет состояние модального окна данными товара
 	 * @param product Товар, который нужно отобразить
+	 * @param content Опциональный готовый контент для отображения
 	 */
-	update(product: IProduct): void;
+	update(product: IProduct, content?: HTMLElement): void;
 
 	/**
 	 * Размонтирует модальное окно

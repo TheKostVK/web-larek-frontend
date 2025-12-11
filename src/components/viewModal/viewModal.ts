@@ -1,19 +1,37 @@
 import { View } from '../view/view';
 import { IViewModal } from '../../types';
 import { ensureElement, shouldCloseModalOnClick, shouldCloseModalOnKeyDown } from '../../utils/utils';
+import { SELECTORS } from '../../utils/constants';
 
+/**
+ * Базовый абстрактный класс для модальных окон
+ */
 abstract class ViewModal<S extends object> extends View<S> implements IViewModal<S> {
 	protected onCloseModalCallback: () => void | null = null;
 	protected onOpenModalCallback: () => void | null = null;
 	protected scrollY = 0;
 	protected modalContentHTML: HTMLElement | null = null;
 	protected isBaseEventListeners = false;
+	protected renderData: unknown = null;
 
-	protected constructor(root: HTMLElement | string, initialState: S) {
-		super(root, initialState);
-		this.modalContentHTML = ensureElement('.modal__content', this.el);
+	public isModalOpen(): boolean {
+		return this.el?.classList.contains(SELECTORS.MODAL.ACTIVE) ?? false;
 	}
 
+	/**
+	 * Конструктор базового класса ViewModal
+	 * @param root {HTMLElement | string} - DOM-элемент или селектор контейнера модального окна
+	 * @param initialState {S} - начальное состояние компонента типа S
+	 */
+	protected constructor(root: HTMLElement | string, initialState: S) {
+		super(root, initialState);
+		this.modalContentHTML = ensureElement(SELECTORS.MODAL.CONTENT, this.el);
+	}
+
+	/**
+	 * Задаёт функцию коллбек на закрытие модального окна
+	 * @param callback {() => void} - функция коллбек
+	 */
 	public setOnCloseModalCallback(callback: () => void): void {
 		if (typeof callback !== 'function') {
 			return;
@@ -22,6 +40,10 @@ abstract class ViewModal<S extends object> extends View<S> implements IViewModal
 		this.onCloseModalCallback = callback;
 	}
 
+	/**
+	 * Задаёт функцию коллбек на открытие модального окна
+	 * @param callback {() => void} - функция коллбек
+	 */
 	public setOnOpenModalCallback(callback: () => void): void {
 		if (typeof callback !== 'function') {
 			return;
@@ -38,26 +60,35 @@ abstract class ViewModal<S extends object> extends View<S> implements IViewModal
 		document.body.style.left = '0';
 		document.body.style.right = '0';
 		document.body.style.width = '100%';
-		document.body.classList.add('modal_open');
+		document.body.classList.add(SELECTORS.MODAL.OPEN);
 
-		this.el.classList.add('modal_active');
+		this.el.classList.add(SELECTORS.MODAL.ACTIVE);
 		
 		if (!this.isBaseEventListeners) {
 			this.el.addEventListener('click', this.clickEvent);
 			document.body.addEventListener('keydown', this.keyDownEvent);
 			this.isBaseEventListeners = true;
 		}
-		
-		if (!this.isMounted) {
-			this.mount();
-		} else {
-			this.render();
+	}
+
+	public update(newState: S, renderData?: unknown): void {
+		this.state = newState;
+		this.renderData = renderData;
+
+		if (renderData !== undefined) {
+			if (this.isModalOpen() || this.el) {
+				if (!this.isMounted) {
+					this.mount();
+				} else {
+					this.render();
+				}
+			}
 		}
 	}
 
 	public closeModal(): void {
-		this.el.classList.remove('modal_active');
-		document.body.classList.remove('modal_open');
+		this.el.classList.remove(SELECTORS.MODAL.ACTIVE);
+		document.body.classList.remove(SELECTORS.MODAL.OPEN);
 		document.body.style.position = '';
 		document.body.style.top = '';
 		document.body.style.left = '';

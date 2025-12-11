@@ -1,19 +1,26 @@
 import { Card } from './card';
 import { IProduct, ICardPreview } from '../../types';
+import { SELECTORS } from '../../utils/constants';
 
+/**
+ * Класс карточки товара для предпросмотра
+ */
 export class CardPreview extends Card implements ICardPreview {
 	protected description: HTMLElement;
 	protected button: HTMLButtonElement;
 
+	/**
+	 * Конструктор класса CardPreview
+	 */
 	constructor() {
-		const template = document.querySelector('#card-preview') as HTMLTemplateElement | null;
+		const template = document.querySelector(SELECTORS.IDS.CARD_PREVIEW) as HTMLTemplateElement | null;
 		if (!template) {
 			throw new Error('CardPreview: шаблон карточки не найден');
 		}
 		super(template);
 
-		this.description = this.container.querySelector('.card__text') as HTMLElement;
-		this.button = this.container.querySelector('.card__button') as HTMLButtonElement;
+		this.description = this.container.querySelector(SELECTORS.CARD.TEXT) as HTMLElement;
+		this.button = this.container.querySelector(SELECTORS.CARD.BUTTON) as HTMLButtonElement;
 
 		if (!this.description || !this.button) {
 			throw new Error('CardPreview: некорректный шаблон карточки');

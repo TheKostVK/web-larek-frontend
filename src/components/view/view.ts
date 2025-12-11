@@ -11,8 +11,9 @@ export abstract class View<S extends object> implements IView<S> {
 	protected isEventListeners = false;
 
 	/**
-	 * @param root DOM-элемент или селектор корневого элемента
-	 * @param initialState начальное состояние компонента
+	 * Конструктор базового класса View
+	 * @param root {HTMLElement | string} - DOM-элемент или селектор корневого элемента
+	 * @param initialState {S} - начальное состояние компонента типа S
 	 */
 	protected constructor(root: HTMLElement | string, initialState: S) {
 		this.el = ensureElement(root);
@@ -39,7 +40,7 @@ export abstract class View<S extends object> implements IView<S> {
 
 	/**
 	 * Обновить состояние компонента и перерисовать его
-	 * @param newState частичное состояние
+	 * @param newState {Partial<S>} - частичное состояние компонента
 	 */
 	public update(newState: Partial<S>): void {
 		this.state = {

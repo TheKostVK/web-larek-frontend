@@ -1,6 +1,10 @@
 import { Form } from '../../base/form';
 import { IOrderStep2SubmitHandler, IValidator } from '../../../types';
+import { SELECTORS, ATTRIBUTES } from '../../../utils/constants';
 
+/**
+ * Класс формы второго шага заказа (контакты)
+ */
 export class OrderStep2Form extends Form {
 	private emailInput: HTMLInputElement | null = null;
 	private phoneInput: HTMLInputElement | null = null;
@@ -8,6 +12,13 @@ export class OrderStep2Form extends Form {
 	private emailValidator: IValidator;
 	private phoneValidator: IValidator;
 
+	/**
+	 * Конструктор класса OrderStep2Form
+	 * @param form {HTMLFormElement} - DOM-элемент формы
+	 * @param submitHandler {IOrderStep2SubmitHandler} - обработчик отправки формы
+	 * @param emailValidator {IValidator} - валидатор email
+	 * @param phoneValidator {IValidator} - валидатор телефона
+	 */
 	constructor(
 		form: HTMLFormElement,
 		submitHandler: IOrderStep2SubmitHandler,
@@ -18,8 +29,8 @@ export class OrderStep2Form extends Form {
 		this.submitHandler = submitHandler;
 		this.emailValidator = emailValidator;
 		this.phoneValidator = phoneValidator;
-		this.emailInput = this.form.querySelector<HTMLInputElement>('input[name="email"]');
-		this.phoneInput = this.form.querySelector<HTMLInputElement>('input[name="phone"]');
+		this.emailInput = this.form.querySelector<HTMLInputElement>(`input[name="${ATTRIBUTES.NAME.EMAIL}"]`);
+		this.phoneInput = this.form.querySelector<HTMLInputElement>(`input[name="${ATTRIBUTES.NAME.PHONE}"]`);
 		this.updateSubmitButton();
 	}
 

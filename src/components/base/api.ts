@@ -26,11 +26,22 @@ export class Api {
 
 		const data = await response.json().catch(() => null);
 
-		return Promise.reject((data && (data as any).error) ?? response.statusText);
+		if (data && typeof data === 'object' && 'error' in data) {
+			const errorData = data as { error?: unknown };
+			return Promise.reject(errorData.error ?? response.statusText);
+		}
+
+		return Promise.reject(response.statusText);
+	}
+
+	protected normalizeUrl(uri: string): string {
+		const baseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
+		const normalizedUri = uri.startsWith('/') ? uri : `/${ uri }`;
+		return baseUrl + normalizedUri;
 	}
 
 	public get<T>(uri: string): Promise<T> {
-		return fetch(this.baseUrl + uri, {
+		return fetch(this.normalizeUrl(uri), {
 			...this.options,
 			method: 'GET',
 		}).then((response) => this.handleResponse<T>(response));
@@ -41,7 +52,7 @@ export class Api {
 		data: object,
 		method: ApiPostMethods = 'POST'
 	): Promise<T> {
-		return fetch(this.baseUrl + uri, {
+		return fetch(this.normalizeUrl(uri), {
 			...this.options,
 			method,
 			body: JSON.stringify(data),

@@ -1,13 +1,25 @@
 import { Form } from '../../base/form';
 import { PaymentMethod, IOrderStep1SubmitHandler } from '../../../types';
+import { SELECTORS, ATTRIBUTES } from '../../../utils/constants';
 
+/**
+ * Класс формы первого шага заказа (оплата и адрес)
+ */
 export class OrderStep1Form extends Form {
 	private selectedPayment: PaymentMethod | null = null;
 	private addressInput: HTMLInputElement | null = null;
+	private buttonsContainer: HTMLElement | null = null;
+	private payButtons: HTMLButtonElement[] = [];
 	private defaultPayment: PaymentMethod;
 	private submitHandler: IOrderStep1SubmitHandler;
-	private readonly ACTIVE_CLASS = 'button_alt-active';
+	private readonly ACTIVE_CLASS = SELECTORS.BUTTON.ALT_ACTIVE;
 
+	/**
+	 * Конструктор класса OrderStep1Form
+	 * @param form {HTMLFormElement} - DOM-элемент формы
+	 * @param defaultPayment {PaymentMethod} - способ оплаты по умолчанию
+	 * @param submitHandler {IOrderStep1SubmitHandler} - обработчик отправки формы
+	 */
 	constructor(
 		form: HTMLFormElement,
 		defaultPayment: PaymentMethod,
@@ -16,7 +28,11 @@ export class OrderStep1Form extends Form {
 		super(form);
 		this.defaultPayment = defaultPayment;
 		this.submitHandler = submitHandler;
-		this.addressInput = this.form.querySelector<HTMLInputElement>('input[name="address"]');
+		this.addressInput = this.form.querySelector<HTMLInputElement>(`input[name="${ATTRIBUTES.NAME.ADDRESS}"]`);
+		this.buttonsContainer = this.form.querySelector<HTMLElement>(SELECTORS.ORDER.BUTTONS);
+		if (this.buttonsContainer) {
+			this.payButtons = Array.from(this.buttonsContainer.querySelectorAll<HTMLButtonElement>(SELECTORS.BUTTON.BUTTON));
+		}
 		this.setupPaymentButtons();
 		this.updateSubmitButton();
 	}
@@ -26,17 +42,14 @@ export class OrderStep1Form extends Form {
 	}
 
 	protected setupPaymentButtons(): void {
-		const buttonsContainer = this.form.querySelector<HTMLElement>('.order__buttons');
-		if (!buttonsContainer) return;
+		if (!this.buttonsContainer || this.payButtons.length === 0) return;
 
-		const payButtons = Array.from(buttonsContainer.querySelectorAll<HTMLButtonElement>('button'));
-
-		payButtons.forEach((btn) => {
+		this.payButtons.forEach((btn) => {
 			btn.addEventListener('click', () => {
 				const name = btn.getAttribute('name');
-				this.selectedPayment = name === 'card' ? 'online' : 'offline';
+				this.selectedPayment = name === ATTRIBUTES.NAME.CARD ? 'online' : 'offline';
 
-				payButtons.forEach((b) => b.classList.toggle(this.ACTIVE_CLASS, b === btn));
+				this.payButtons.forEach((b) => b.classList.toggle(this.ACTIVE_CLASS, b === btn));
 				this.updateSubmitButton();
 			});
 		});

@@ -8,11 +8,11 @@ export function pascalToKebab(value: string): string {
 	return value.replace(/([a-z0–9])([A-Z])/g, '$1-$2').toLowerCase();
 }
 
-export function isSelector(x: any): x is string {
+export function isSelector(x: unknown): x is string {
 	return typeof x === 'string' && x.length > 1;
 }
 
-export function isEmpty(value: any): boolean {
+export function isEmpty(value: unknown): boolean {
 	return value === null || value === undefined;
 }
 
@@ -57,11 +57,16 @@ export function isPaymentMethod(value: unknown): value is PaymentMethod {
 /**
  * Проверка соответствия объекта интерфейсу IEvents
  */
-export function isIEvents(obj: any): obj is IEvents {
+export function isIEvents(obj: unknown): obj is IEvents {
+	if (typeof obj !== 'object' || obj === null) {
+		return false;
+	}
+	
+	const eventObj = obj as Record<string, unknown>;
 	return (
-		typeof obj?.on === 'function' &&
-		typeof obj?.emit === 'function' &&
-		typeof obj?.trigger === 'function'
+		typeof eventObj.on === 'function' &&
+		typeof eventObj.emit === 'function' &&
+		typeof eventObj.trigger === 'function'
 	);
 }
 
@@ -135,9 +140,9 @@ export function isOrder(obj: unknown): obj is IOrder {
 	return (
 		isStringArray(o.items) &&
 		isPaymentMethod(o.payment) &&
-		typeof o.email === 'string' && o.email.trim().length > 0 &&
-		typeof o.phone === 'string' && o.phone.trim().length > 0 &&
-		typeof o.address === 'string' && o.address.trim().length > 0 &&
+		typeof o.email === 'string' &&
+		typeof o.phone === 'string' &&
+		typeof o.address === 'string' &&
 		typeof o.total === 'number' && Number.isFinite(o.total) && o.total >= 0
 	);
 }
@@ -306,8 +311,13 @@ export function createElement<T extends HTMLElement>(
 			if (isPlainObject(value) && key === 'dataset') {
 				setElementData(element, value);
 			} else {
-				// @ts-expect-error fix indexing later
-				element[key] = isBoolean(value) ? value : String(value);
+				const elementKey = key as keyof HTMLElement;
+				if (elementKey in element) {
+					const elementValue = element[elementKey];
+					if (typeof elementValue === 'string' || typeof elementValue === 'boolean') {
+						(element as Record<string, unknown>)[key] = isBoolean(value) ? value : String(value);
+					}
+				}
 			}
 		}
 	}

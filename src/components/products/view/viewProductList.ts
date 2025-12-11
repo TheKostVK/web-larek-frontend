@@ -1,24 +1,20 @@
-import { IProduct, IViewProductList, ICard } from '../../../types';
+import { IProduct, IViewProductList } from '../../../types';
 import { View } from '../../view/view';
 import { getElementData } from '../../../utils/utils';
+import { SELECTORS } from '../../../utils/constants';
 
+/**
+ * Класс представления списка товаров
+ */
 class ViewProductList extends View<IProduct[]> implements IViewProductList {
 	protected onProductClickCallback: ((productId: string) => void) | null = null;
-	protected cardFactory: (product: IProduct) => ICard;
+	protected renderData: HTMLElement[] | null = null;
 
-	constructor(cardFactory: (product: IProduct) => ICard) {
-		super('.gallery', []);
-		this.cardFactory = cardFactory;
-	}
-
-	protected createProductCard(product: IProduct): HTMLElement {
-		const card = this.cardFactory(product);
-		card.render(product);
-		return card.getContainer();
-	}
-
-	protected createProductList(products: IProduct[]): HTMLElement[] {
-		return products.map((product: IProduct) => this.createProductCard(product));
+	/**
+	 * Конструктор класса ViewProductList
+	 */
+	constructor() {
+		super(SELECTORS.GALLERY.GALLERY, []);
 	}
 
 	public setOnProductClickCallback(callback: (productId: string) => void): void {
@@ -29,8 +25,9 @@ class ViewProductList extends View<IProduct[]> implements IViewProductList {
 		this.onProductClickCallback = callback;
 	}
 
-	public update(products: IProduct[]): void {
+	public update(products: IProduct[], cards?: HTMLElement[]): void {
 		this.state = products;
+		this.renderData = cards || null;
 
 		if (this.isMounted) {
 			this.render();
@@ -44,11 +41,14 @@ class ViewProductList extends View<IProduct[]> implements IViewProductList {
 
 		this.el.replaceChildren();
 
-		const cards: HTMLElement[] = this.createProductList(this.state);
+		if (!this.renderData || this.renderData.length === 0) {
+			this.isMounted = true;
+			return;
+		}
 
 		const fragment = document.createDocumentFragment();
 
-		for (const card of cards) {
+		for (const card of this.renderData) {
 			fragment.appendChild(card);
 		}
 
@@ -56,7 +56,7 @@ class ViewProductList extends View<IProduct[]> implements IViewProductList {
 			this.el.addEventListener('click', (evt) => {
 				if (!(evt.target instanceof HTMLElement)) return;
 
-				const card = evt.target.closest<HTMLElement>('.card');
+				const card = evt.target.closest<HTMLElement>(SELECTORS.CARD.CARD);
 				if (!card || !this.onProductClickCallback) return;
 
 				const { id } = getElementData<{ id: string }>(card, { id: String });

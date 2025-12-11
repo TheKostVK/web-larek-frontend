@@ -1,10 +1,17 @@
 import { settings } from '../../utils/constants';
 
+/**
+ * Базовый абстрактный класс для форм
+ */
 export abstract class Form {
 	protected form: HTMLFormElement;
 	protected submitButton: HTMLButtonElement | null = null;
 	protected inputElements: HTMLInputElement[] = [];
 
+	/**
+	 * Конструктор базового класса Form
+	 * @param form {HTMLFormElement} - DOM-элемент формы
+	 */
 	constructor(form: HTMLFormElement) {
 		this.form = form;
 		this.init();

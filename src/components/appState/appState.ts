@@ -2,7 +2,7 @@
 import { IEvents } from '../base/events';
 import { CART_EVENTS, PRODUCT_EVENTS, settings, SYSTEM_EVENTS } from '../../utils/constants';
 import { isCart, isProduct } from '../../utils/utils';
-import { IAppState, IModelCart, IModelOrder, IModelProduct, IProduct, IProductApi } from '../../types';
+import { IAppState, IModelCart, IModelOrder, IModelProduct, IProduct, IAppApi } from '../../types';
 
 
 class AppState implements IAppState {
@@ -11,17 +11,17 @@ class AppState implements IAppState {
 	protected modelOrder: IModelOrder;
 	protected events: IEvents;
 
-	protected productApi: IProductApi;
+	protected api: IAppApi;
 
 	protected openedModal: string | null;
 
-	constructor(modelProduct: IModelProduct, modelCart: IModelCart, modelOrder: IModelOrder, events: IEvents, productApi: IProductApi) {
+	constructor(modelProduct: IModelProduct, modelCart: IModelCart, modelOrder: IModelOrder, events: IEvents, api: IAppApi) {
 		this.modelProduct = modelProduct;
 		this.modelCart = modelCart;
 		this.modelOrder = modelOrder;
 		this.events = events;
 
-		this.productApi = productApi;
+		this.api = api;
 
 		this.openedModal = null;
 	}
@@ -49,7 +49,7 @@ class AppState implements IAppState {
 
 	protected async loadProducts(): Promise<void> {
 		try {
-			const products = await this.productApi.getProducts();
+			const products = await this.api.getProducts();
 
 			this.modelProduct.setProducts(products);
 			this.events.emit(PRODUCT_EVENTS.PRODUCTS_LOADED);
@@ -60,18 +60,32 @@ class AppState implements IAppState {
 	};
 
 	protected loadCart(): void {
-		const cartDataLs = JSON.parse(localStorage.getItem(settings.cartStorageKey));
-		localStorage.setItem(settings.cartStorageKey, JSON.stringify([]));
+		const cartDataLs = localStorage.getItem(settings.cartStorageKey);
+		
+		if (!cartDataLs) {
+			this.events.emit(CART_EVENTS.CART_LOADED);
+			return;
+		}
 
-		if (!isCart(cartDataLs)) return;
-
-		cartDataLs.items.forEach((item: IProduct) => {
-			if (isProduct(item)) {
-				this.modelCart.addItem(item);
+		try {
+			const parsedCart = JSON.parse(cartDataLs);
+			
+			if (!isCart(parsedCart)) {
+				this.events.emit(CART_EVENTS.CART_LOADED);
+				return;
 			}
-		});
 
-		this.events.emit(CART_EVENTS.CART_LOADED);
+			parsedCart.items.forEach((item: IProduct) => {
+				if (isProduct(item)) {
+					this.modelCart.addItem(item);
+				}
+			});
+
+			this.events.emit(CART_EVENTS.CART_LOADED);
+		} catch (error) {
+			console.error('[AppState] Ошибка загрузки корзины из localStorage:', error);
+			this.events.emit(CART_EVENTS.CART_LOADED);
+		}
 	};
 }
 

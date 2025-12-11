@@ -11,8 +11,9 @@ export interface IViewProductList extends IView<IProduct[]> {
 	/**
 	 * Обновление состояния
 	 * @param products {IProduct[]} массив товаров
+	 * @param cards {HTMLElement[]} опциональный массив готовых карточек товаров
 	 */
-	update(products: IProduct[]): void;
+	update(products: IProduct[], cards?: HTMLElement[]): void;
 
 	/**
 	 * Рендер

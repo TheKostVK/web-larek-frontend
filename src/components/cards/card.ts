@@ -1,7 +1,10 @@
 import { cloneTemplate, getClassFromTag, setElementData } from '../../utils/utils';
 import { IProduct, ICard } from '../../types';
-import { CDN_URL } from '../../utils/constants';
+import { CDN_URL, SELECTORS } from '../../utils/constants';
 
+/**
+ * Базовый абстрактный класс для карточек товаров
+ */
 export abstract class Card implements ICard {
 	protected container: HTMLElement;
 	protected title: HTMLElement;
@@ -9,13 +12,17 @@ export abstract class Card implements ICard {
 	protected image: HTMLImageElement | null = null;
 	protected category: HTMLElement | null = null;
 
+	/**
+	 * Конструктор базового класса Card
+	 * @param template {HTMLTemplateElement | string} - шаблон карточки (DOM-элемент или селектор)
+	 */
 	protected constructor(template: HTMLTemplateElement | string) {
 		this.container = cloneTemplate<HTMLElement>(template);
 		
-		this.title = this.container.querySelector('.card__title') as HTMLElement;
-		this.price = this.container.querySelector('.card__price') as HTMLElement;
-		this.image = this.container.querySelector('.card__image') as HTMLImageElement | null;
-		this.category = this.container.querySelector('.card__category') as HTMLElement | null;
+		this.title = this.container.querySelector(SELECTORS.CARD.TITLE) as HTMLElement;
+		this.price = this.container.querySelector(SELECTORS.CARD.PRICE) as HTMLElement;
+		this.image = this.container.querySelector(SELECTORS.CARD.IMAGE) as HTMLImageElement | null;
+		this.category = this.container.querySelector(SELECTORS.CARD.CATEGORY) as HTMLElement | null;
 
 		if (!this.title || !this.price) {
 			throw new Error('Card: некорректный шаблон карточки');

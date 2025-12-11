@@ -1,52 +1,48 @@
 import ViewModal from '../../viewModal/viewModal';
-import { cloneTemplate, ensureElement, getElementData, isCart } from '../../../utils/utils';
+import { cloneTemplate, ensureElement, isCart } from '../../../utils/utils';
 import { ICart, IViewCartModal, ICardBasket, IProduct } from '../../../types';
+import { SELECTORS } from '../../../utils/constants';
 
+/**
+ * Класс представления модального окна корзины
+ */
 class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
-	protected cartTemplate: HTMLTemplateElement | null = document.querySelector('#basket');
+	protected cartTemplate: HTMLTemplateElement | null = document.querySelector(SELECTORS.IDS.BASKET);
 	protected cartButton: HTMLElement | null = null;
 	protected cartCount: HTMLElement | null = null;
-	protected onRemoveToCartCallback: (itemId: string) => void | null = null;
 	protected onOrderCallback: () => void | null = null;
-	protected cardFactory: (product: IProduct, index: number) => ICardBasket;
 
-	public constructor(cardFactory: (product: IProduct, index: number) => ICardBasket) {
-		const modalContainer = ensureElement('#modal-container');
+	/**
+	 * Конструктор класса ViewCartModal
+	 * @param modalContainer {HTMLElement | string} - DOM-элемент или селектор контейнера модального окна
+	 */
+	public constructor(modalContainer: HTMLElement | string) {
 		super(modalContainer, {
 			items: [],
 			itemsCount: 0,
 			totalPrice: 0,
 		});
 
-		this.cardFactory = cardFactory;
-
-		this.cartButton = ensureElement('.header__basket');
-		this.cartCount = ensureElement('.header__basket-counter', this.cartButton);
+		this.cartButton = ensureElement(SELECTORS.HEADER.BASKET);
+		this.cartCount = ensureElement(SELECTORS.HEADER.BASKET_COUNTER, this.cartButton);
 
 		this.cartButton.addEventListener('click', () => {
 			this.onOpenModalCallback();
 		});
 	}
 
-	public setOnRemoveToCartCallback(callback: (itemId: string) => void): void {
-		this.onRemoveToCartCallback = callback;
-	}
-
 	public setOnOrderCallback(callback: () => void): void {
 		this.onOrderCallback = callback;
 	}
 
-	public update(cartData: ICart): void {
+	public update(cartData: ICart, cards?: ICardBasket[]): void {
 		if (!isCart(cartData)) return;
 
-		this.state = cartData;
 		if (this.cartCount) {
 			this.cartCount.textContent = cartData.itemsCount.toString();
 		}
-		
-		if (this.isMounted) {
-			this.render();
-		}
+
+		super.update(cartData, cards);
 	}
 
 	protected createModalContent(cartData: ICart, cards: ICardBasket[]): HTMLElement {
@@ -55,13 +51,9 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 		}
 
 		const cart = cloneTemplate<HTMLElement>(this.cartTemplate);
-		const cartList = cart.querySelector('.basket__list') as HTMLElement | null;
-		const cartPrice = cart.querySelector('.basket__price') as HTMLElement | null;
-		const orderButton = cart.querySelector('.basket__button') as HTMLButtonElement | null;
-
-		if (!cartList || !cartPrice) {
-			throw new Error('ViewCartModal: некорректный шаблон корзины');
-		}
+		const cartList = ensureElement(SELECTORS.BASKET.LIST, cart);
+		const cartPrice = ensureElement(SELECTORS.BASKET.PRICE, cart);
+		const orderButton = cart.querySelector(SELECTORS.BASKET.BUTTON) as HTMLButtonElement | null;
 
 		cartPrice.textContent = `${ cartData.totalPrice } синапсов`;
 
@@ -86,14 +78,7 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 	protected clickToCartEvent = (evt: MouseEvent): void => {
 		if (!(evt.target instanceof HTMLElement)) return;
 
-		if (this.onRemoveToCartCallback && evt.target.classList.contains('basket__item-delete')) {
-			const card = evt.target.closest<HTMLElement>('.basket__item');
-			const { id } = getElementData<{ id: string }>(card, { id: String });
-
-			this.onRemoveToCartCallback(id);
-		}
-
-		if (this.onOrderCallback && evt.target.classList.contains('basket__button')) {
+		if (this.onOrderCallback && evt.target.classList.contains(SELECTORS.BASKET.BUTTON_CLASS)) {
 			const button = evt.target as HTMLButtonElement;
 			if (!button.disabled) {
 				this.onOrderCallback();
@@ -115,15 +100,11 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 		}
 	}
 
-	public render(cards: ICardBasket[] = []): void {
-		if (!cards.length && this.state.items.length > 0) {
-			cards = this.state.items.map((item, index) => {
-				const card = this.cardFactory(item, index);
-				card.render(item, index);
-				return card;
-			});
-		}
-
+	/**
+	 * Рендерит текущее состояние корзины в DOM
+	 */
+	public render(): void {
+		const cards: ICardBasket[] = (this.renderData as ICardBasket[]) || [];
 		const modalContent: HTMLElement = this.createModalContent(this.state, cards);
 		this.renderContent(modalContent);
 		this.setupCustomEventListeners();

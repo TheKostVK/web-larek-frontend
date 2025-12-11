@@ -1,11 +1,16 @@
 import { Card } from './card';
 import { IProduct, ICard } from '../../types';
+import { SELECTORS } from '../../utils/constants';
 
+/**
+ * Класс карточки товара для каталога
+ */
 export class CardProduct extends Card implements ICard {
-	protected productTemplate: HTMLTemplateElement | null = document.querySelector('#card-catalog');
-
+	/**
+	 * Конструктор класса CardProduct
+	 */
 	constructor() {
-		const template = document.querySelector('#card-catalog') as HTMLTemplateElement | null;
+		const template = document.querySelector(SELECTORS.IDS.CARD_CATALOG) as HTMLTemplateElement | null;
 		if (!template) {
 			throw new Error('CardProduct: шаблон карточки не найден');
 		}
