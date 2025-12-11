@@ -160,6 +160,9 @@ docs/                        # Документация
 
 **Интерфейс:** `IModelProduct`
 
+**Конструктор:**
+- `initialProducts: IProduct[] = []` — начальный массив товаров (опциональный, по умолчанию пустой массив)
+
 **Состояние:**
 - `products: IProduct[]` — массив товаров
 - `itemsCount: number` — количество товаров
@@ -186,6 +189,9 @@ docs/                        # Документация
 **Расположение:** `src/components/cart/model/modelCart.ts`
 
 **Интерфейс:** `IModelCart`
+
+**Конструктор:**
+- Параметры отсутствуют (конструктор без параметров)
 
 **Состояние:**
 - `cartData: ICart` — объект корзины, содержащий:
@@ -225,6 +231,9 @@ docs/                        # Документация
 **Расположение:** `src/components/order/model/modelOreder.ts`
 
 **Интерфейс:** `IModelOrder`
+
+**Конструктор:**
+- Параметры отсутствуют (конструктор без параметров)
 
 **Состояние:**
 - `orderData: IOrder` — объект заказа, содержащий:
@@ -272,6 +281,10 @@ docs/                        # Документация
 
 **Интерфейс:** `IView<S>`
 
+**Конструктор:**
+- `root: HTMLElement | string` — DOM-элемент или селектор корневого элемента
+- `initialState: S` — начальное состояние компонента типа `S`
+
 **Состояние:**
 - `el: HTMLElement | null` — корневой DOM-элемент представления (protected)
 - `state: S` — состояние представления типа `S` (protected)
@@ -297,6 +310,10 @@ docs/                        # Документация
 **Расположение:** `src/components/viewModal/viewModal.ts`
 
 **Интерфейс:** `IViewModal<S>`
+
+**Конструктор:**
+- `root: HTMLElement | string` — DOM-элемент или селектор контейнера модального окна
+- `initialState: S` — начальное состояние компонента типа `S`
 
 **Дополнительное состояние:**
 - `onCloseModalCallback: () => void | null` — коллбек на закрытие модального окна (protected)
@@ -333,6 +350,9 @@ docs/                        # Документация
 
 **Интерфейс:** `IViewProductList extends IView<IProduct[]>`
 
+**Конструктор:**
+- Параметры отсутствуют (конструктор без параметров)
+
 **Методы:**
 
 | Метод | Параметры | Возвращает | Описание |
@@ -353,6 +373,9 @@ docs/                        # Документация
 **Расположение:** `src/components/products/view/viewProductModal.ts`
 
 **Интерфейс:** `IViewProductModal extends IViewModal<IProduct>`
+
+**Конструктор:**
+- `modalContainer: HTMLElement | string = SELECTORS.IDS.MODAL_CONTAINER` — DOM-элемент или селектор контейнера модального окна (опциональный, по умолчанию используется селектор из констант)
 
 **Методы:**
 
@@ -377,6 +400,9 @@ docs/                        # Документация
 
 **Интерфейс:** `IViewCartModal extends IViewModal<ICart>`
 
+**Конструктор:**
+- `modalContainer: HTMLElement | string` — DOM-элемент или селектор контейнера модального окна
+
 **Методы:**
 
 | Метод | Параметры | Возвращает | Описание |
@@ -396,6 +422,9 @@ docs/                        # Документация
 **Расположение:** `src/components/order/view/viewOrderModal.ts`
 
 **Интерфейс:** `IViewOrderModal extends IViewModal<IOrder>`
+
+**Конструктор:**
+- `modalContainer: HTMLElement | string = SELECTORS.IDS.MODAL_CONTAINER` — DOM-элемент или селектор контейнера модального окна (опциональный, по умолчанию используется селектор из констант)
 
 **Методы:**
 
@@ -417,6 +446,13 @@ docs/                        # Документация
 **Назначение:** Координация между моделью каталога (`ModelProduct`) и представлениями (`ViewProductList`, `ViewProductModal`).
 
 **Расположение:** `src/components/products/presenter/presenterProduct.ts`
+
+**Конструктор:**
+- `model: IModelProduct` — модель каталога товаров
+- `viewList: IViewProductList` — представление списка товаров
+- `viewModal: IViewProductModal` — представление модального окна товара
+- `events: IEvents` — система событий (EventBus)
+- `cardFactory: ICardFactory` — фабрика для создания карточек товаров
 
 **Зависимости:**
 - `IModelProduct` — модель каталога товаров
@@ -462,6 +498,12 @@ docs/                        # Документация
 
 **Расположение:** `src/components/cart/presenter/presenterCart.ts`
 
+**Конструктор:**
+- `model: IModelCart` — модель корзины
+- `view: IViewCartModal` — представление модального окна корзины
+- `events: IEvents` — система событий (EventBus)
+- `cardFactory: ICardFactory` — фабрика для создания карточек товаров
+
 **Зависимости:**
 - `IModelCart` — модель корзины
 - `IViewCartModal` — представление модального окна корзины
@@ -506,6 +548,12 @@ docs/                        # Документация
 **Назначение:** Пошаговый процесс оформления заказа и интеграция с серверным API.
 
 **Расположение:** `src/components/order/presenter/presenterOrder.ts`
+
+**Конструктор:**
+- `model: IModelOrder` — модель заказа
+- `api: IAppApi` — API-клиент для отправки заказа
+- `view: IViewOrderModal` — представление модального окна заказа
+- `events: IEvents` — система событий (EventBus)
 
 **Зависимости:**
 - `IModelOrder` — модель заказа
@@ -573,6 +621,10 @@ docs/                        # Документация
 
 **Расположение:** `src/components/base/api.ts`
 
+**Конструктор:**
+- `baseUrl: string` — базовый URL API
+- `options: RequestInit = {}` — опции для HTTP‑запросов (опциональный, по умолчанию пустой объект)
+
 **Состояние:**
 - `baseUrl: string` — базовый URL API (readonly)
 - `options: RequestInit` — опции для HTTP‑запросов (protected)
@@ -600,6 +652,10 @@ docs/                        # Документация
 **Расположение:** `src/components/api/appApi.ts`
 
 **Интерфейс:** `IAppApi`
+
+**Конструктор:**
+- `baseUrl: string` — базовый URL API
+- `options: RequestInit = {}` — опции для HTTP‑запросов (опциональный, по умолчанию пустой объект)
 
 **Методы:**
 
@@ -639,7 +695,7 @@ Response: IPostOrderResponse { id: string, total: number }
 
 **Интерфейс:** `IAppState`
 
-**Зависимости конструктора:**
+**Конструктор:**
 - `modelProduct: IModelProduct` — модель каталога товаров
 - `modelCart: IModelCart` — модель корзины
 - `modelOrder: IModelOrder` — модель заказа
@@ -673,6 +729,9 @@ Response: IPostOrderResponse { id: string, total: number }
 
 **Интерфейс:** `ICardFactory`
 
+**Конструктор:**
+- Параметры отсутствуют (конструктор без параметров)
+
 **Методы:**
 
 | Метод | Параметры | Возвращает | Описание |
@@ -694,6 +753,9 @@ Response: IPostOrderResponse { id: string, total: number }
 **Расположение:** `src/components/base/events.ts`
 
 **Интерфейс:** `IEvents`
+
+**Конструктор:**
+- Параметры отсутствуют (конструктор без параметров)
 
 **Методы интерфейса `IEvents`:**
 
