@@ -1,7 +1,16 @@
 import ViewModal from '../../viewModal/viewModal';
 import { cloneTemplate, ensureElement, isOrder } from '../../../utils/utils';
 import { DEFAULT_ORDER_STEP, PAYMENT_METHODS, REG_EXP_EMAIL, REG_EXP_PHONE } from '../../../utils/constants';
-import { IOrder, IViewOrderModal, OrderStep, PaymentMethod } from '../../../types';
+import {
+	IOrder,
+	IViewOrderModal,
+	OrderStep,
+	PaymentMethod,
+	IOrderStep1SubmitHandler,
+	IOrderStep2SubmitHandler,
+	IValidator,
+} from '../../../types';
+import { OrderStep1Form, OrderStep2Form } from '../forms';
 
 class ViewOrderModal extends ViewModal<IOrder> implements IViewOrderModal {
 	protected orderTemplate: HTMLTemplateElement | null = document.querySelector('#order');
@@ -134,113 +143,44 @@ class ViewOrderModal extends ViewModal<IOrder> implements IViewOrderModal {
 	 * Инициализация слушателей для шага 1
 	 */
 	protected bindStep1(form: HTMLFormElement): void {
-		const buttonsContainer = form.querySelector<HTMLElement>('.order__buttons');
-		const addressInput = form.querySelector<HTMLInputElement>('input[name="address"]');
-		const nextButton = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-
-		let selectedPayment: PaymentMethod | null = null;
-		const ACTIVE_CLASS = 'button_alt-active';
-
-		const updateNextButton = (): void => {
-			const address = addressInput?.value.trim() ?? '';
-			const isAddressValid = address.length > 0;
-			const isPaymentValid = selectedPayment !== null;
-
-			const isValid = isAddressValid && isPaymentValid;
-
-			if (nextButton) {
-				nextButton.disabled = !isValid;
-			}
+		const submitHandler: IOrderStep1SubmitHandler = {
+			handleSubmit: (payment, address) => {
+				if (this.setDataStep1) {
+					this.setDataStep1(payment, address);
+				}
+			},
 		};
 
-		// выбор способа оплаты
-		if (buttonsContainer) {
-			const payButtons = Array.from(
-				buttonsContainer.querySelectorAll<HTMLButtonElement>('button'),
-			);
-
-			payButtons.forEach((btn) => {
-				btn.addEventListener('click', () => {
-					const name = btn.getAttribute('name');
-					selectedPayment = name === 'card' ? 'online' : 'offline';
-
-					payButtons.forEach((b) => b.classList.toggle(ACTIVE_CLASS, b === btn));
-					updateNextButton();
-				});
-			});
-		}
-
-		form.addEventListener('submit', (evt) => {
-			evt.preventDefault();
-
-			const address = addressInput?.value.trim() ?? '';
-			const payment = selectedPayment ?? this.state.payment;
-
-			if (this.setDataStep1) {
-				this.setDataStep1(payment, address);
-			}
-		});
-
-		if (addressInput) {
-			addressInput.addEventListener('input', () => {
-				updateNextButton();
-			});
-		}
-
-		updateNextButton();
+		new OrderStep1Form(form, this.state.payment, submitHandler);
 	}
 
 	/**
 	 * Инициализация слушателей для шага 2
 	 */
 	protected bindStep2(form: HTMLFormElement): void {
-		const emailInput = form.querySelector<HTMLInputElement>('input[name="email"]');
-		const phoneInput = form.querySelector<HTMLInputElement>('input[name="phone"]');
-		const submitButton = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+		const submitHandler: IOrderStep2SubmitHandler = {
+			handleSubmit: (email, phone) => {
+				if (this.setDataStep2) {
+					this.setDataStep2(email, phone);
+				}
+			},
+		};
 
-		this.step2SubmitButton = submitButton || null;
+		const emailValidator: IValidator = {
+			validate: (value: string) => this.isEmailValid(value),
+		};
+
+		const phoneValidator: IValidator = {
+			validate: (value: string) => this.isPhoneValid(value),
+		};
+
+		const formInstance = new OrderStep2Form(form, submitHandler, emailValidator, phoneValidator);
+
+		const submitButton = formInstance.getSubmitButton();
+		this.step2SubmitButton = submitButton;
 		if (submitButton && submitButton.textContent) {
 			this.step2SubmitDefaultText = submitButton.textContent;
 		}
-
-		const updateSubmitButton = (): void => {
-			const email = emailInput?.value.trim() ?? '';
-			const phone = phoneInput?.value.trim() ?? '';
-
-			const emailValid = this.isEmailValid(email);
-			const phoneValid = this.isPhoneValid(phone);
-
-			const isValid = emailValid && phoneValid;
-
-			if (submitButton) {
-				submitButton.disabled = !isValid;
-			}
-		};
-
-		form.addEventListener('submit', (evt) => {
-			evt.preventDefault();
-
-			const email = emailInput?.value.trim() ?? '';
-			const phone = phoneInput?.value.trim() ?? '';
-
-			if (this.setDataStep2) {
-				this.setDataStep2(email, phone);
-			}
-		});
-
-		if (emailInput) {
-			emailInput.addEventListener('input', () => {
-				updateSubmitButton();
-			});
-		}
-
-		if (phoneInput) {
-			phoneInput.addEventListener('input', () => {
-				updateSubmitButton();
-			});
-		}
-
-		updateSubmitButton();
 	}
 
 	/**

@@ -5,6 +5,7 @@ export * from './components/cards/card.interface';
 export * from './components/order/model/modelOrder.interface';
 export * from './components/order/view/viewOrderModal.interface';
 export * from './components/order/api/orederApi.interface';
+export * from './components/order/forms/forms.interface';
 export * from './components/products/model/modelProduct.interface';
 export * from './components/products/view/viewProductList.interface';
 export * from './components/products/view/viewProductModal.interface';
