@@ -119,7 +119,6 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 
 	public unmount(): void {
 		this.isMounted = false;
-		const modalContentHTML: HTMLElement = ensureElement('.modal__content', this.el);
 
 		this.el.removeEventListener('click', this.clickEvent);
 		document.body.removeEventListener('keydown', this.keyDownEvent);
@@ -128,18 +127,19 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 
 		this.isEventListeners = false;
 
-		modalContentHTML.replaceChildren();
+		if (this.modalContentHTML) {
+			this.modalContentHTML.replaceChildren();
+		}
 	}
 
 	public render(): void {
-		if (!this.el) {
+		if (!this.el || !this.modalContentHTML) {
 			throw new Error('ViewCartModal: корневой элемент не найден');
 		}
 
-		const modalContentHTML: HTMLElement = ensureElement('.modal__content', this.el);
 		const modalContent: HTMLElement = this.createModalContent(this.state);
 
-		modalContentHTML.replaceChildren();
+		this.modalContentHTML.replaceChildren();
 
 		if (!this.isEventListeners) {
 			this.el.addEventListener('click', this.clickEvent);
@@ -150,7 +150,7 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 			this.isEventListeners = true;
 		}
 
-		modalContentHTML.appendChild(modalContent);
+		this.modalContentHTML.appendChild(modalContent);
 		this.isMounted = true;
 	}
 }

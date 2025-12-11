@@ -349,25 +349,25 @@ class ViewOrderModal extends ViewModal<IOrder> implements IViewOrderModal {
 
 	public unmount(): void {
 		this.isMounted = false;
-		const modalContentHTML: HTMLElement = ensureElement('.modal__content', this.el);
 
 		this.el.removeEventListener('click', this.clickEvent);
 		document.body.removeEventListener('keydown', this.keyDownEvent);
 
 		this.isEventListeners = false;
 
-		modalContentHTML.replaceChildren();
+		if (this.modalContentHTML) {
+			this.modalContentHTML.replaceChildren();
+		}
 	}
 
 	public render(): void {
-		if (!this.el) {
+		if (!this.el || !this.modalContentHTML) {
 			throw new Error('ViewOrderModal: корневой элемент не найден');
 		}
 
-		const modalContentHTML: HTMLElement = ensureElement('.modal__content', this.el);
 		const modalContent: HTMLElement = this.createModalContent(this.state, this.currentStep);
 
-		modalContentHTML.replaceChildren();
+		this.modalContentHTML.replaceChildren();
 
 		if (!this.isEventListeners) {
 			this.el.addEventListener('click', this.clickEvent);
@@ -376,7 +376,7 @@ class ViewOrderModal extends ViewModal<IOrder> implements IViewOrderModal {
 			this.isEventListeners = true;
 		}
 
-		modalContentHTML.appendChild(modalContent);
+		this.modalContentHTML.appendChild(modalContent);
 		this.isMounted = true;
 	}
 }

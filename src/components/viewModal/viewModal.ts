@@ -6,6 +6,12 @@ abstract class ViewModal<S extends object> extends View<S> implements IViewModal
 	protected onCloseModalCallback: () => void | null = null;
 	protected onOpenModalCallback: () => void | null = null;
 	protected scrollY = 0;
+	protected modalContentHTML: HTMLElement | null = null;
+
+	protected constructor(root: HTMLElement | string, initialState: S) {
+		super(root, initialState);
+		this.modalContentHTML = ensureElement('.modal__content', this.el);
+	}
 
 	public setOnCloseModalCallback(callback: () => void): void {
 		if (typeof callback !== 'function') {
@@ -85,7 +91,6 @@ abstract class ViewModal<S extends object> extends View<S> implements IViewModal
 
 	public unmount(): void {
 		this.isMounted = false;
-		const modalContentHTML: HTMLElement = ensureElement('.modal__content', this.el);
 
 		if (this.isEventListeners) {
 			this.el.removeEventListener('click', this.clickEvent);
@@ -93,7 +98,9 @@ abstract class ViewModal<S extends object> extends View<S> implements IViewModal
 			this.isEventListeners = false;
 		}
 
-		modalContentHTML.replaceChildren();
+		if (this.modalContentHTML) {
+			this.modalContentHTML.replaceChildren();
+		}
 	}
 
 	public abstract render(): void;
