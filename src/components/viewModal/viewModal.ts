@@ -7,6 +7,7 @@ abstract class ViewModal<S extends object> extends View<S> implements IViewModal
 	protected onOpenModalCallback: () => void | null = null;
 	protected scrollY = 0;
 	protected modalContentHTML: HTMLElement | null = null;
+	protected isBaseEventListeners = false;
 
 	protected constructor(root: HTMLElement | string, initialState: S) {
 		super(root, initialState);
@@ -40,14 +41,22 @@ abstract class ViewModal<S extends object> extends View<S> implements IViewModal
 		document.body.classList.add('modal_open');
 
 		this.el.classList.add('modal_active');
-		document.body.classList.add('modal_open');
-		this.mount();
+		
+		if (!this.isBaseEventListeners) {
+			this.el.addEventListener('click', this.clickEvent);
+			document.body.addEventListener('keydown', this.keyDownEvent);
+			this.isBaseEventListeners = true;
+		}
+		
+		if (!this.isMounted) {
+			this.mount();
+		} else {
+			this.render();
+		}
 	}
 
 	public closeModal(): void {
 		this.el.classList.remove('modal_active');
-		document.body.classList.remove('modal_open');
-
 		document.body.classList.remove('modal_open');
 		document.body.style.position = '';
 		document.body.style.top = '';
@@ -92,15 +101,41 @@ abstract class ViewModal<S extends object> extends View<S> implements IViewModal
 	public unmount(): void {
 		this.isMounted = false;
 
-		if (this.isEventListeners) {
+		if (this.isBaseEventListeners) {
 			this.el.removeEventListener('click', this.clickEvent);
 			document.body.removeEventListener('keydown', this.keyDownEvent);
-			this.isEventListeners = false;
+			this.isBaseEventListeners = false;
 		}
+
+		this.removeCustomEventListeners();
 
 		if (this.modalContentHTML) {
 			this.modalContentHTML.replaceChildren();
 		}
+	}
+
+	protected validateElements(): void {
+		if (!this.el || !this.modalContentHTML) {
+			throw new Error(`${this.constructor.name}: корневой элемент не найден`);
+		}
+	}
+
+	protected renderContent(content: HTMLElement): void {
+		this.validateElements();
+
+		if (!this.modalContentHTML) {
+			return;
+		}
+
+		this.modalContentHTML.replaceChildren();
+		this.modalContentHTML.appendChild(content);
+		this.isMounted = true;
+	}
+
+	protected setupCustomEventListeners(): void {
+	}
+
+	protected removeCustomEventListeners(): void {
 	}
 
 	public abstract render(): void;

@@ -1,7 +1,7 @@
 import { IEvents } from '../../base/events';
 import { CART_EVENTS, SYSTEM_EVENTS, SYSTEM_NAME_SPACE } from '../../../utils/constants';
 import { isProduct } from '../../../utils/utils';
-import { CartCheckRequest, IModelCart, IProduct, IViewCartModal } from '../../../types';
+import { CartCheckRequest, IModelCart, IProduct, IViewCartModal, ICardBasket } from '../../../types';
 
 class PresenterCart {
 	protected model: IModelCart;
@@ -33,6 +33,7 @@ class PresenterCart {
 
 			const newCartData = this.model.getCartData();
 			this.view.update(newCartData);
+			this.closeModal();
 
 			this.events.emit(CART_EVENTS.CART_COMPLETE, cartData);
 		});

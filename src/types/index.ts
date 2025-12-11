@@ -1,6 +1,7 @@
 export * from './components/appState/appState.interface';
 export * from './components/cart/model/modelCart.interface';
 export * from './components/cart/view/viewCartModal.interface';
+export * from './components/cards/card.interface';
 export * from './components/order/model/modelOrder.interface';
 export * from './components/order/view/viewOrderModal.interface';
 export * from './components/order/api/orederApi.interface';

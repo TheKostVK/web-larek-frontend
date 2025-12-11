@@ -1,43 +1,20 @@
-import { IProduct, IViewProductList } from '../../../types';
+import { IProduct, IViewProductList, ICard } from '../../../types';
 import { View } from '../../view/view';
-import { cloneTemplate, getClassFromTag, getElementData, setElementData } from '../../../utils/utils';
-import { CDN_URL } from '../../../utils/constants';
+import { getElementData } from '../../../utils/utils';
 
 class ViewProductList extends View<IProduct[]> implements IViewProductList {
-	protected productTemplate: HTMLTemplateElement | null = document.querySelector('#card-catalog');
 	protected onProductClickCallback: ((productId: string) => void) | null = null;
+	protected cardFactory: (product: IProduct) => ICard;
 
-	constructor() {
+	constructor(cardFactory: (product: IProduct) => ICard) {
 		super('.gallery', []);
+		this.cardFactory = cardFactory;
 	}
 
 	protected createProductCard(product: IProduct): HTMLElement {
-		if (!this.productTemplate) {
-			throw new Error('ViewProductList: шаблон карточки не найден');
-		}
-
-		const card = cloneTemplate<HTMLElement>(this.productTemplate);
-		const tag = card.querySelector('.card__category') as HTMLElement;
-		const title = card.querySelector('.card__title') as HTMLElement;
-		const price = card.querySelector('.card__price') as HTMLElement;
-		const img = card.querySelector('.card__image') as HTMLImageElement;
-
-		if (!tag || !title || !price || !img) {
-			throw new Error('ViewProductList: некорректный шаблон карточки товара');
-		}
-
-		const categoryClass: string = getClassFromTag(product.category);
-
-		tag.classList.add(categoryClass);
-		title.innerText = product.title;
-		price.innerText = product.price !== null ? `${ product.price } синапсов` : 'бесконечность';
-
-		img.src = `${ CDN_URL }${ product.image }`;
-		img.alt = product.title;
-
-		setElementData(card, product);
-
-		return card;
+		const card = this.cardFactory(product);
+		card.render(product);
+		return card.getContainer();
 	}
 
 	protected createProductList(products: IProduct[]): HTMLElement[] {

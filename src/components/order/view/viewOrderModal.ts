@@ -347,37 +347,9 @@ class ViewOrderModal extends ViewModal<IOrder> implements IViewOrderModal {
 		}
 	}
 
-	public unmount(): void {
-		this.isMounted = false;
-
-		this.el.removeEventListener('click', this.clickEvent);
-		document.body.removeEventListener('keydown', this.keyDownEvent);
-
-		this.isEventListeners = false;
-
-		if (this.modalContentHTML) {
-			this.modalContentHTML.replaceChildren();
-		}
-	}
-
 	public render(): void {
-		if (!this.el || !this.modalContentHTML) {
-			throw new Error('ViewOrderModal: корневой элемент не найден');
-		}
-
 		const modalContent: HTMLElement = this.createModalContent(this.state, this.currentStep);
-
-		this.modalContentHTML.replaceChildren();
-
-		if (!this.isEventListeners) {
-			this.el.addEventListener('click', this.clickEvent);
-			document.body.addEventListener('keydown', this.keyDownEvent);
-
-			this.isEventListeners = true;
-		}
-
-		this.modalContentHTML.appendChild(modalContent);
-		this.isMounted = true;
+		this.renderContent(modalContent);
 	}
 }
 

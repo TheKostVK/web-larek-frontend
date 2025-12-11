@@ -1,22 +1,24 @@
 import ViewModal from '../../viewModal/viewModal';
-import { cloneTemplate, ensureElement, getElementData, isCart, setElementData } from '../../../utils/utils';
-import { ICart, IViewCartModal } from '../../../types';
+import { cloneTemplate, ensureElement, getElementData, isCart } from '../../../utils/utils';
+import { ICart, IViewCartModal, ICardBasket, IProduct } from '../../../types';
 
 class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 	protected cartTemplate: HTMLTemplateElement | null = document.querySelector('#basket');
-	protected cardProductTemplate: HTMLTemplateElement | null = document.querySelector('#card-basket');
 	protected cartButton: HTMLElement | null = null;
 	protected cartCount: HTMLElement | null = null;
 	protected onRemoveToCartCallback: (itemId: string) => void | null = null;
 	protected onOrderCallback: () => void | null = null;
+	protected cardFactory: (product: IProduct, index: number) => ICardBasket;
 
-	public constructor() {
+	public constructor(cardFactory: (product: IProduct, index: number) => ICardBasket) {
 		const modalContainer = ensureElement('#modal-container');
 		super(modalContainer, {
 			items: [],
 			itemsCount: 0,
 			totalPrice: 0,
 		});
+
+		this.cardFactory = cardFactory;
 
 		this.cartButton = ensureElement('.header__basket');
 		this.cartCount = ensureElement('.header__basket-counter', this.cartButton);
@@ -39,15 +41,15 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 
 		this.state = cartData;
 		if (this.cartCount) {
-			this.cartCount.innerText = cartData.itemsCount.toString();
+			this.cartCount.textContent = cartData.itemsCount.toString();
 		}
-
+		
 		if (this.isMounted) {
 			this.render();
 		}
 	}
 
-	protected createModalContent(cartData: ICart): HTMLElement {
+	protected createModalContent(cartData: ICart, cards: ICardBasket[]): HTMLElement {
 		if (!this.cartTemplate) {
 			throw new Error('ViewCartModal: шаблон корзины не найден');
 		}
@@ -63,37 +65,19 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 
 		cartPrice.textContent = `${ cartData.totalPrice } синапсов`;
 
-		const isEmpty = cartData.items.length === 0;
+		const isEmpty = cards.length === 0;
 
 		if (orderButton) {
 			orderButton.disabled = isEmpty;
 		}
 
 		if (isEmpty) {
-			cartList.innerText = 'Пусто(';
+			cartList.textContent = 'Пусто(';
 			return cart;
 		}
 
-		cartData.items.forEach((item, index) => {
-			const cardProduct: HTMLElement = cloneTemplate<HTMLElement>(this.cardProductTemplate);
-			const itemIndex: HTMLElement = cardProduct.querySelector('.basket__item-index');
-			const itemTitle: HTMLElement = cardProduct.querySelector('.card__title');
-			const itemPrice: HTMLElement = cardProduct.querySelector('.card__price');
-			const itemDeleted: HTMLElement = cardProduct.querySelector('.basket__item-delete');
-
-			if (!itemIndex || !itemTitle || !itemPrice || !itemDeleted) {
-				throw new Error('ViewCartModal: некорректный шаблон карточки товара');
-			}
-
-			itemIndex.textContent = (index + 1).toString();
-			itemTitle.textContent = item.title;
-			itemPrice.textContent = item.price
-				? `${ item.price } синапсов`
-				: 'бесконечность';
-
-			setElementData(cardProduct, item);
-
-			cartList.appendChild(cardProduct);
+		cards.forEach((card) => {
+			cartList.appendChild(card.getContainer());
 		});
 
 		return cart;
@@ -117,41 +101,32 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 		}
 	};
 
-	public unmount(): void {
-		this.isMounted = false;
-
-		this.el.removeEventListener('click', this.clickEvent);
-		document.body.removeEventListener('keydown', this.keyDownEvent);
-
-		this.el.removeEventListener('click', this.clickToCartEvent);
-
-		this.isEventListeners = false;
-
-		if (this.modalContentHTML) {
-			this.modalContentHTML.replaceChildren();
+	protected setupCustomEventListeners(): void {
+		if (!this.isEventListeners) {
+			this.el.addEventListener('click', this.clickToCartEvent);
+			this.isEventListeners = true;
 		}
 	}
 
-	public render(): void {
-		if (!this.el || !this.modalContentHTML) {
-			throw new Error('ViewCartModal: корневой элемент не найден');
+	protected removeCustomEventListeners(): void {
+		if (this.isEventListeners) {
+			this.el.removeEventListener('click', this.clickToCartEvent);
+			this.isEventListeners = false;
+		}
+	}
+
+	public render(cards: ICardBasket[] = []): void {
+		if (!cards.length && this.state.items.length > 0) {
+			cards = this.state.items.map((item, index) => {
+				const card = this.cardFactory(item, index);
+				card.render(item, index);
+				return card;
+			});
 		}
 
-		const modalContent: HTMLElement = this.createModalContent(this.state);
-
-		this.modalContentHTML.replaceChildren();
-
-		if (!this.isEventListeners) {
-			this.el.addEventListener('click', this.clickEvent);
-			document.body.addEventListener('keydown', this.keyDownEvent);
-
-			this.el.addEventListener('click', this.clickToCartEvent);
-
-			this.isEventListeners = true;
-		}
-
-		this.modalContentHTML.appendChild(modalContent);
-		this.isMounted = true;
+		const modalContent: HTMLElement = this.createModalContent(this.state, cards);
+		this.renderContent(modalContent);
+		this.setupCustomEventListeners();
 	}
 }
 

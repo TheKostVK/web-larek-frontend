@@ -7,9 +7,12 @@ import ModelProduct from './components/products/model/modelProduct';
 import ViewProductList from './components/products/view/viewProductList';
 import ViewProductModal from './components/products/view/viewProductModal';
 import PresenterProductModal from './components/products/presenter/presenterProductModal';
+import { CardProduct } from './components/cards/cardProduct';
+import { CardPreview } from './components/cards/cardPreview';
 import ModelCart from './components/cart/model/modelCart';
 import ViewCartModal from './components/cart/view/viewCartModal';
 import PresenterCart from './components/cart/presenter/presenterCart';
+import { CardBasket } from './components/cards/cardBasket';
 import ModelOrder from './components/order/model/modelOreder';
 import OrderApi from './components/order/api/orderApi';
 import PresenterOrder from './components/order/presenter/presenterOrder';
@@ -22,13 +25,13 @@ const productApi = new ProductApi(API_URL);
 const orderApi = new OrderApi(API_URL);
 
 const modelProduct = new ModelProduct([]);
-const viewProductList = new ViewProductList();
-const viewProductModal = new ViewProductModal();
+const viewProductList = new ViewProductList((product) => new CardProduct());
+const viewProductModal = new ViewProductModal((product, inCart) => new CardPreview());
 const presenterProductList = new PresenterProductList(modelProduct, viewProductList, events);
 const presenterProductModal = new PresenterProductModal(modelProduct, viewProductModal, events);
 
 const modelCart = new ModelCart();
-const viewCartModal = new ViewCartModal();
+const viewCartModal = new ViewCartModal((product, index) => new CardBasket());
 const presenterCart = new PresenterCart(modelCart, viewCartModal, events);
 
 const modelOrder = new ModelOrder();

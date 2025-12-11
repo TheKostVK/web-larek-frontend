@@ -1,5 +1,6 @@
 import { ICart } from '../model/modelCart.interface';
 import { IViewModal } from '../../viewModal/viewModal.interface';
+import { ICardBasket } from '../../cards/card.interface';
 
 /**
  * Интерфейс View корзины
@@ -29,6 +30,7 @@ export interface IViewCartModal extends IViewModal<ICart> {
 
 	/**
 	 * Рендерит текущее состояние корзины в DOM
+	 * @param cards массив готовых карточек товаров
 	 */
-	render(): void;
+	render(cards?: unknown[]): void;
 }
