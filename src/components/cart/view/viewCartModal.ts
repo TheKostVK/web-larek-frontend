@@ -55,6 +55,7 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 		const cart = cloneTemplate<HTMLElement>(this.cartTemplate);
 		const cartList = cart.querySelector('.basket__list') as HTMLElement | null;
 		const cartPrice = cart.querySelector('.basket__price') as HTMLElement | null;
+		const orderButton = cart.querySelector('.basket__button') as HTMLButtonElement | null;
 
 		if (!cartList || !cartPrice) {
 			throw new Error('ViewCartModal: некорректный шаблон корзины');
@@ -62,7 +63,13 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 
 		cartPrice.textContent = `${ cartData.totalPrice } синапсов`;
 
-		if (cartData.items.length === 0) {
+		const isEmpty = cartData.items.length === 0;
+
+		if (orderButton) {
+			orderButton.disabled = isEmpty;
+		}
+
+		if (isEmpty) {
 			cartList.innerText = 'Пусто(';
 			return cart;
 		}
@@ -103,7 +110,10 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 		}
 
 		if (this.onOrderCallback && evt.target.classList.contains('basket__button')) {
-			this.onOrderCallback();
+			const button = evt.target as HTMLButtonElement;
+			if (!button.disabled) {
+				this.onOrderCallback();
+			}
 		}
 	};
 
