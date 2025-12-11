@@ -124,12 +124,15 @@ docs/
 - очистка корзины перед оформлением заказа
 
 **Основные методы:**
-- `addItem(item)`
-- `removeItem(itemId)`
-- `clearCart()`
-- `getItems()`
-- `getTotalPrice()`
-- `getItemsCount()`
+- `init(cartData: ICart)` — инициализация корзины из сохранённых данных
+- `addItem(item: IProduct)` — добавление товара в корзину
+- `removeItem(itemId: string)` — удаление товара из корзины
+- `clearCart()` — очистка корзины
+- `getItems(): IProduct[]` — получение списка товаров
+- `getTotalPrice(): number` — получение итоговой суммы
+- `getItemsCount(): number` — получение количества товаров
+- `getItemById(id: string): IProduct | null` — получение товара по ID
+- `getCartData(): ICart` — получение полных данных корзины
 
 ---
 
@@ -145,13 +148,14 @@ docs/
 - очистка данных после оформления
 
 **Основные методы:**
-- `setItems(items)`
-- `setPaymentMethod(method)`
-- `setEmail(email)`
-- `setPhone(phone)`
-- `setAddress(address)`
-- `clearData()`
-- `getOrderData()`
+- `setItems(items: string[])` — установка списка ID товаров
+- `setPaymentMethod(method: PaymentMethod)` — установка способа оплаты
+- `setEmail(email: string)` — установка email с валидацией
+- `setPhone(phone: string)` — установка телефона с валидацией
+- `setAddress(address: string)` — установка адреса доставки
+- `setTotal(total: number)` — установка итоговой суммы заказа
+- `clearData()` — очистка данных заказа
+- `getOrderData(): IOrder` — получение полных данных заказа
 
 ---
 
@@ -226,12 +230,13 @@ docs/
 - отображение успешного и неуспешного результата
 
 **Основные методы:**
-- `setStep(step)` — навигация между шагами
+- `setStep(step: OrderStep)` — навигация между шагами (1, 2, 3, 4)
 - `setDataStep1Callback(cb)` — шаг 1 (оплата + адрес)
 - `setDataStep2Callback(cb)` — шаг 2 (email + телефон)
 - `setDataStep3Callback(cb)` — шаг 3 (успешное завершение)
-- `setOrderResult(id, total)` — отображение номера заказа
-- `setOrderError(msg)` — отображение текста ошибки
+- `setStep2Loading(isLoading: boolean)` — управление состоянием загрузки кнопки на шаге 2
+- `setOrderResult(id: string, total: number)` — отображение номера заказа на шаге 3
+- `setOrderError(msg: string)` — отображение текста ошибки на шаге 4
 
 ---
 
@@ -243,24 +248,28 @@ docs/
 ### `View<S>` — базовый класс представлений
 
 Базовый класс для всех представлений, работающих с DOM.  
-Обеспечивает создание корневого элемента, рендеринг, монтирование и управление событиями.
+Обеспечивает создание корневого элемента, рендеринг, монтирование и управление состоянием.
 
-- `root` — корневой DOM-элемент представления
-- `state` — состояние представления типа `S`
-- `render()` — метод рендеринга, который должен быть реализован в наследниках
-- `mount(parent: HTMLElement)` — добавляет `root` в DOM
-- `unmount()` — удаляет `root` из DOM
-- `on(event: string, handler: EventListener)` — добавляет обработчик события на `root`
-- `off(event: string, handler: EventListener)` — удаляет обработчик события с `root`
+- `el` — корневой DOM-элемент представления (protected)
+- `state` — состояние представления типа `S` (protected)
+- `isMounted` — флаг монтирования компонента (protected)
+- `render()` — абстрактный метод рендеринга, который должен быть реализован в наследниках
+- `mount()` — монтирует компонент в DOM (вызывает `render()`)
+- `unmount()` — демонтирует компонент из DOM (очищает содержимое)
+- `update(newState: Partial<S>)` — обновляет состояние и перерисовывает компонент, если он смонтирован
+- `getElement(): HTMLElement | null` — возвращает корневой DOM-элемент
 
 ### `ViewModal<S>` — базовый класс для модальных окон
 
 Наследуется от `View<S>`.  
 Добавляет функциональность открытия и закрытия модального окна.
 
-- `open()` — открывает модальное окно (добавляет в DOM, показывает)
-- `close()` — закрывает модальное окно (прячет, удаляет из DOM)
+- `openModal()` — открывает модальное окно (блокирует прокрутку страницы, добавляет в DOM, показывает)
+- `closeModal()` — закрывает модальное окно (восстанавливает прокрутку, прячет, удаляет из DOM)
+- `setOnOpenModalCallback(callback)` — задаёт функцию-коллбек на открытие модального окна
+- `setOnCloseModalCallback(callback)` — задаёт функцию-коллбек на закрытие модального окна
 - Обработка клика по фону и кнопке закрытия для закрытия окна
+- Обработка нажатия клавиши Escape для закрытия окна
 - Поддержка анимаций открытия/закрытия
 
 Эти базовые классы упрощают создание новых представлений и модальных окон, обеспечивая единый интерфейс и управление жизненным циклом компонентов.
@@ -285,8 +294,8 @@ docs/
 - проброс кликов по товарам в виде событий
 
 **Основные события и действия:**
-- слушает `PRODUCT_EVENTS.PRODUCTS_LOADED` → обновляет view
-- `onProductClick(productId)` → получает товар и эмитит `PRODUCT_EVENTS.PRODUCT_CLICK`
+- слушает `PRODUCT_EVENTS.PRODUCTS_LOADED` → получает товары из модели и обновляет view
+- `onProductClick(productId)` → получает товар из модели по ID и эмитит `PRODUCT_EVENTS.PRODUCT_CLICK` с данными товара
 
 ---
 
@@ -315,9 +324,11 @@ docs/
 - начало оформления заказа
 
 **Основные события:**
-- слушает `CART_EVENTS.CART_PRODUCT_ADD` → обновляет корзину
-- эмитит `CART_EVENTS.CART_COMPLETE` при переходе к оформлению заказа
-- обрабатывает запрос `CART_EVENTS.CART_CHECK_ITEM` → отвечает, есть ли товар в корзине
+- слушает `CART_EVENTS.CART_LOADED` → обновляет view корзины после восстановления из localStorage
+- слушает `CART_EVENTS.CART_PRODUCT_ADD` → добавляет товар в модель и обновляет view корзины
+- слушает `CART_EVENTS.CART_PRODUCT_DELETE` → обновляет view корзины после удаления товара
+- слушает `CART_EVENTS.CART_CHECK_ITEM` → отвечает, есть ли товар в корзине (используется `PresenterProductModal` для проверки наличия товара)
+- эмитит `CART_EVENTS.CART_COMPLETE` при переходе к оформлению заказа (передаёт данные корзины)
 
 ---
 
@@ -332,8 +343,9 @@ docs/
 - отправка заказа на сервер и отображение результата
 
 **Основные события:**
-- слушает `CART_EVENTS.CART_COMPLETE` → открывает модальное окно оформления
-- эмитит `ORDER_EVENTS.ORDER_SUBMIT` при успешном заказе
+- слушает `CART_EVENTS.CART_COMPLETE` → получает данные корзины, заполняет модель заказа и открывает модальное окно оформления
+- эмитит `ORDER_EVENTS.ORDER_SUBMIT` при успешном заказе (после получения ответа от сервера и на шаге 3)
+- эмитит `ORDER_EVENTS.ORDER_STEP` при смене шага оформления заказа
 
 ---
 
@@ -375,8 +387,9 @@ Presenter → EventBus → Presenter
 ---
 ### Роль в архитектуре
 
-- запускает приложение (данные готовы → события отправлены)
-- восстанавливает состояние корзины при старте страницы
+- запускает приложение: загружает товары через API, восстанавливает корзину из localStorage
+- загружает товары через `productApi.getProducts()` и эмитит `PRODUCT_EVENTS.PRODUCTS_LOADED` или `PRODUCT_EVENTS.PRODUCTS_LOAD_FAILED`
+- восстанавливает состояние корзины из localStorage при старте страницы и эмитит `CART_EVENTS.CART_LOADED`
 - хранит и контролирует информацию о том, какая модалка открыта, реагируя на `SYSTEM_EVENTS.MODAL_OPEN` и `SYSTEM_EVENTS.MODAL_CLOSE`
 
 ---
@@ -386,12 +399,15 @@ Presenter → EventBus → Presenter
 `EventBus` — это централизованный механизм событий, реализованный через `EventEmitter` или аналог, который обеспечивает обмен сообщениями между модулями без прямых зависимостей.
 
 Основные характеристики:
-- Подписка на события и их обработка
-- Эмитирование событий с передачей данных
+- Подписка на события через `on<T>(event, callback)` и их обработка
+- Эмитирование событий с передачей данных через `emit<T>(event, data?)`
+- Отписка от событий через `off(event, callback)`
 - Обеспечение слабой связанности между компонентами
-- Поддержка различных типов событий (например, `PRODUCT_EVENTS`, `CART_EVENTS`, `ORDER_EVENTS`)
+- Поддержка различных типов событий: `PRODUCT_EVENTS`, `CART_EVENTS`, `ORDER_EVENTS`, `SYSTEM_EVENTS`
+- Поддержка подписки на все события через `onAll(callback)`
+- Создание триггеров через `trigger(eventName, context?)`
 
-Использование `EventBus` способствует чистой архитектуре и упрощает расширение приложения.
+Реализован через класс `EventEmitter`, который реализует интерфейс `IEvents`. Использование `EventBus` способствует чистой архитектуре и упрощает расширение приложения.
 
 ---
 
@@ -406,8 +422,8 @@ Presenter → EventBus → Presenter
 
 | Метод | Назначение |
 |-------|------------|
-| `protected async get<T>(uri: string): Promise<T>` | Выполняет GET‑запрос и возвращает данные требуемого типа |
-| `protected async post<T, B>(uri: string, body: B): Promise<T>` | Выполняет POST‑запрос с телом `body` и возвращает результат |
+| `public get<T>(uri: string): Promise<T>` | Выполняет GET‑запрос и возвращает данные требуемого типа |
+| `public post<T>(uri: string, data: object, method?: ApiPostMethods): Promise<T>` | Выполняет POST/PUT/DELETE‑запрос с телом `data` и возвращает результат |
 | `protected handleResponse<T>(response: Response): Promise<T>` | Единая обработка статуса и JSON‑ответа сервера |
 
 Класс `Api` скрывает детали `fetch` и единую обработку ошибок, что упрощает поддержку.
@@ -423,12 +439,16 @@ Presenter → EventBus → Presenter
 | Метод | Возвращаемые данные | Используется |
 |-------|--------------------|--------------|
 | `getProducts(): Promise<IProduct[]>` | список товаров | `AppState.init()` при старте приложения |
+| `getProductById(id: string): Promise<IProduct>` | данные товара по ID | резерв для будущего функционала |
 
 Запросы:
 
 ```
 GET /product
-Response: IProduct[]
+Response: ApiListResponse<IProduct> (содержит items: IProduct[])
+
+GET /product/{id}
+Response: IProduct
 ```
 
 ---

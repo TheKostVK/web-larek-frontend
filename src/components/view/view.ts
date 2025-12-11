@@ -32,7 +32,9 @@ export abstract class View<S extends object> implements IView<S> {
 	 */
 	public unmount(): void {
 		this.isMounted = false;
-		this.el.innerHTML = '';
+		if (this.el) {
+			this.el.replaceChildren();
+		}
 	}
 
 	/**

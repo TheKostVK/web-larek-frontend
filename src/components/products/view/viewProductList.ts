@@ -65,7 +65,7 @@ class ViewProductList extends View<IProduct[]> implements IViewProductList {
 			throw new Error('ViewProductList: корневой элемент не найден');
 		}
 
-		this.el.innerHTML = '';
+		this.el.replaceChildren();
 
 		const cards: HTMLElement[] = this.createProductList(this.state);
 

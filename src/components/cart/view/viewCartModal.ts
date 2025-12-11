@@ -60,7 +60,7 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 			throw new Error('ViewCartModal: некорректный шаблон корзины');
 		}
 
-		cartPrice.innerHTML = `${ cartData.totalPrice } синапсов`;
+		cartPrice.textContent = `${ cartData.totalPrice } синапсов`;
 
 		if (cartData.items.length === 0) {
 			cartList.innerText = 'Пусто(';
@@ -78,9 +78,9 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 				throw new Error('ViewCartModal: некорректный шаблон карточки товара');
 			}
 
-			itemIndex.innerHTML = (index + 1).toString();
-			itemTitle.innerHTML = item.title;
-			itemPrice.innerHTML = item.price
+			itemIndex.textContent = (index + 1).toString();
+			itemTitle.textContent = item.title;
+			itemPrice.textContent = item.price
 				? `${ item.price } синапсов`
 				: 'бесконечность';
 
@@ -118,7 +118,7 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 
 		this.isEventListeners = false;
 
-		modalContentHTML.innerHTML = '';
+		modalContentHTML.replaceChildren();
 	}
 
 	public render(): void {
@@ -129,7 +129,7 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 		const modalContentHTML: HTMLElement = ensureElement('.modal__content', this.el);
 		const modalContent: HTMLElement = this.createModalContent(this.state);
 
-		modalContentHTML.innerHTML = '';
+		modalContentHTML.replaceChildren();
 
 		if (!this.isEventListeners) {
 			this.el.addEventListener('click', this.clickEvent);

@@ -49,7 +49,7 @@ class PresenterCart {
 				this.view.update(cartData);
 			}
 		});
-		this.events.on<CartCheckRequest>('cart:check-item', (payload) => {
+		this.events.on<CartCheckRequest>(CART_EVENTS.CART_CHECK_ITEM, (payload) => {
 			if (!payload) return;
 
 			const { productId, respond } = payload;

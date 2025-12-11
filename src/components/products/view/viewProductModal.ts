@@ -104,7 +104,7 @@ class ViewProductModal extends ViewModal<IProduct> implements IViewProductModal 
 
 		this.isEventListeners = false;
 
-		modalContentHTML.innerHTML = '';
+		modalContentHTML.replaceChildren();
 	}
 
 	public render(): void {
@@ -115,7 +115,7 @@ class ViewProductModal extends ViewModal<IProduct> implements IViewProductModal 
 		const modalContentHTML: HTMLElement = ensureElement('.modal__content', this.el);
 		const modalContent: HTMLElement = this.createModalContent(this.state);
 
-		modalContentHTML.innerHTML = '';
+		modalContentHTML.replaceChildren();
 
 		if (!this.isEventListeners) {
 			this.el.addEventListener('click', this.clickEvent);

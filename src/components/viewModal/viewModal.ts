@@ -93,7 +93,7 @@ abstract class ViewModal<S extends object> extends View<S> implements IViewModal
 			this.isEventListeners = false;
 		}
 
-		modalContentHTML.innerHTML = '';
+		modalContentHTML.replaceChildren();
 	}
 
 	public abstract render(): void;

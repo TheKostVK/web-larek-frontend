@@ -52,7 +52,7 @@ class PresenterProductModal {
 				},
 			};
 
-			this.events.emit<CartCheckRequest>('cart:check-item', payload);
+			this.events.emit<CartCheckRequest>(CART_EVENTS.CART_CHECK_ITEM, payload);
 		});
 	}
 

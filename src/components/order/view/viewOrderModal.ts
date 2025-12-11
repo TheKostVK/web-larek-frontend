@@ -356,7 +356,7 @@ class ViewOrderModal extends ViewModal<IOrder> implements IViewOrderModal {
 
 		this.isEventListeners = false;
 
-		modalContentHTML.innerHTML = '';
+		modalContentHTML.replaceChildren();
 	}
 
 	public render(): void {
@@ -367,7 +367,7 @@ class ViewOrderModal extends ViewModal<IOrder> implements IViewOrderModal {
 		const modalContentHTML: HTMLElement = ensureElement('.modal__content', this.el);
 		const modalContent: HTMLElement = this.createModalContent(this.state, this.currentStep);
 
-		modalContentHTML.innerHTML = '';
+		modalContentHTML.replaceChildren();
 
 		if (!this.isEventListeners) {
 			this.el.addEventListener('click', this.clickEvent);
