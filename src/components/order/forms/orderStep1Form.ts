@@ -1,11 +1,11 @@
 import { Form } from '../../base/form';
-import { PaymentMethod, IOrderStep1SubmitHandler } from '../../../types';
+import { PaymentMethod, IOrderStep1SubmitHandler, IOrderStep1Form } from '../../../types';
 import { SELECTORS, ATTRIBUTES } from '../../../utils/constants';
 
 /**
  * Класс формы первого шага заказа (оплата и адрес)
  */
-export class OrderStep1Form extends Form {
+export class OrderStep1Form extends Form implements IOrderStep1Form {
 	private selectedPayment: PaymentMethod | null = null;
 	private addressInput: HTMLInputElement | null = null;
 	private buttonsContainer: HTMLElement | null = null;

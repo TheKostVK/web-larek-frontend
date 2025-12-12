@@ -12,4 +12,5 @@ export * from './components/products/view/viewProductList.interface';
 export * from './components/products/view/viewProductModal.interface';
 export * from './components/view/view.interface';
 export * from './components/viewModal/viewModal.interface';
+export * from './components/messages/successMessage.interface';
 export * from './events.types';

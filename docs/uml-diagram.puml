@@ -1,0 +1,706 @@
+@startuml
+!define ABSTRACT abstract
+!define INTERFACE interface
+
+' Базовые интерфейсы
+INTERFACE IView<S> {
+  + mount(): void
+  + unmount(): void
+  + update(newState: Partial<S>): void
+  + getElement(): HTMLElement | null
+  + render(): void
+}
+
+INTERFACE IViewModal<S> extends IView<S> {
+  + isModalOpen(): boolean
+  + setOnCloseModalCallback(callback: () => void): void
+  + setOnOpenModalCallback(callback: () => void): void
+  + openModal(): void
+  + update(newState: S, renderData?: unknown): void
+  + closeModal(): void
+}
+
+INTERFACE IEvents {
+  + on<T>(event: EventName, callback: (data: T) => void): void
+  + emit<T>(event: string, data?: T): void
+  + trigger<T>(event: string, context?: Partial<T>): (data: T) => void
+}
+
+INTERFACE IAppApi {
+  + getProducts(): Promise<IProduct[]>
+  + getProductById(id: string): Promise<IProduct>
+  + postOrder(order: IOrder): Promise<IPostOrderResponse>
+}
+
+INTERFACE IAppState {
+  + init(): Promise<void>
+}
+
+' Интерфейсы карточек
+INTERFACE ICard {
+  + render(product: IProduct): void
+  + getContainer(): HTMLElement
+}
+
+INTERFACE ICardBasket extends ICard {
+  + render(product: IProduct, index?: number): void
+  + setOnDeleteCallback(callback: (itemId: string) => void): void
+}
+
+INTERFACE ICardPreview extends ICard {
+  + render(product: IProduct, inCart?: boolean): void
+}
+
+INTERFACE ICardFactory {
+  + createProductCard(): ICard
+  + createPreviewCard(): ICardPreview
+  + createBasketCard(): ICardBasket
+}
+
+' Интерфейсы сообщений
+INTERFACE ISuccessMessage {
+  + setOrderData(orderId: string, total: number): void
+  + setOnCloseCallback(callback: () => void): void
+  + getContainer(): HTMLElement
+}
+
+INTERFACE ISuccessMessageFactory {
+  + create(): ISuccessMessage
+}
+
+' Интерфейсы моделей
+INTERFACE IModelProduct {
+  + setProducts(products: IProduct[]): void
+  + getProducts(): IProduct[]
+  + getProductById(id: string): IProduct | undefined
+  + getProductsCount(): number
+}
+
+INTERFACE IModelCart {
+  + init(cartData: ICart): void
+  + addItem(item: IProduct): void
+  + removeItem(itemId: string): void
+  + clearCart(): void
+  + getTotalPrice(): number
+  + getItemsCount(): number
+  + getItems(): IProduct[]
+  + getItemById(id: string): IProduct | null
+  + getCartData(): ICart
+}
+
+INTERFACE IModelOrder {
+  + setItems(items: string[]): void
+  + setPaymentMethod(method: PaymentMethod): void
+  + setEmail(email: string): void
+  + setPhone(phone: string): void
+  + setAddress(address: string): void
+  + setTotal(total: number): void
+  + clearData(): void
+  + getOrderData(): IOrder
+}
+
+' Интерфейсы представлений
+INTERFACE IViewProductList extends IView<IProduct[]> {
+  + setOnProductClickCallback(callback: (productId: string) => void): void
+  + update(products: IProduct[], cards?: HTMLElement[]): void
+  + render(): void
+}
+
+INTERFACE IViewProductModal extends IViewModal<IProduct> {
+  + update(product: IProduct, content?: HTMLElement): void
+  + unmount(): void
+  + setOnAddToCartCallback(callback: (product: IProduct) => void): void
+  + setInCartState(inCart: boolean): void
+  + render(): void
+}
+
+INTERFACE IViewCartModal extends IViewModal<ICart> {
+  + setOnOrderCallback(callback: () => void): void
+  + update(cartData: ICart, cards?: ICardBasket[]): void
+}
+
+INTERFACE IViewOrderModal extends IViewModal<IOrder> {
+  + update(orderData: IOrder, content?: HTMLElement): void
+}
+
+' Интерфейсы форм
+INTERFACE IValidator {
+  + validate(value: string): boolean
+}
+
+INTERFACE IOrderStep1SubmitHandler {
+  + handleSubmit(payment: PaymentMethod, address: string): void
+}
+
+INTERFACE IOrderStep2SubmitHandler {
+  + handleSubmit(email: string, phone: string): void
+}
+
+INTERFACE IOrderStep1Form {
+  + getSubmitButton(): HTMLButtonElement | null
+}
+
+INTERFACE IOrderStep2Form {
+  + getSubmitButton(): HTMLButtonElement | null
+}
+
+INTERFACE IOrderStep1FormFactory {
+  + create(form: HTMLFormElement, defaultPayment: PaymentMethod, submitHandler: IOrderStep1SubmitHandler): IOrderStep1Form
+}
+
+INTERFACE IOrderStep2FormFactory {
+  + create(form: HTMLFormElement, submitHandler: IOrderStep2SubmitHandler, emailValidator: IValidator, phoneValidator: IValidator): IOrderStep2Form
+}
+
+' Типы данных
+class IProduct {
+  + id: string
+  + title: string
+  + description: string
+  + category: string
+  + price: number | null
+  + image: string
+}
+
+class ICart {
+  + items: IProduct[]
+  + itemsCount: number
+  + totalPrice: number
+}
+
+class IOrder {
+  + items: string[]
+  + payment: PaymentMethod
+  + email: string
+  + phone: string
+  + address: string
+  + total: number
+}
+
+class IPostOrderResponse {
+  + id: string
+  + total: number
+}
+
+' Базовые классы
+ABSTRACT class View<S> implements IView<S> {
+  # el: HTMLElement | null
+  # state: S
+  # isMounted: boolean
+  # isEventListeners: boolean
+  + constructor(root: HTMLElement | string, initialState: S)
+  + mount(): void
+  + unmount(): void
+  + update(newState: Partial<S>): void
+  + getElement(): HTMLElement | null
+  {abstract} + render(): void
+}
+
+ABSTRACT class ViewModal<S> extends View<S> implements IViewModal<S> {
+  # onCloseModalCallback: () => void | null
+  # onOpenModalCallback: () => void | null
+  # scrollY: number
+  # modalContentHTML: HTMLElement | null
+  # isBaseEventListeners: boolean
+  # renderData: unknown
+  + constructor(root: HTMLElement | string, initialState: S)
+  + isModalOpen(): boolean
+  + setOnCloseModalCallback(callback: () => void): void
+  + setOnOpenModalCallback(callback: () => void): void
+  + openModal(): void
+  + update(newState: S, renderData?: unknown): void
+  + closeModal(): void
+  + unmount(): void
+  # clickEvent(evt: MouseEvent): void
+  # keyDownEvent(evt: KeyboardEvent): void
+  # validateElements(): void
+  # renderContent(content: HTMLElement): void
+  # setupCustomEventListeners(): void
+  # removeCustomEventListeners(): void
+  {abstract} + render(): void
+}
+
+class Api {
+  + readonly baseUrl: string
+  # options: RequestInit
+  + constructor(baseUrl: string, options?: RequestInit)
+  # handleResponse<T>(response: Response): Promise<T>
+  # normalizeUrl(uri: string): string
+  + get<T>(uri: string): Promise<T>
+  + post<T>(uri: string, data: object, method?: ApiPostMethods): Promise<T>
+}
+
+ABSTRACT class Form {
+  # form: HTMLFormElement
+  # submitButton: HTMLButtonElement | null
+  # inputElements: HTMLInputElement[]
+  + constructor(form: HTMLFormElement)
+  # init(): void
+  # setupEventListeners(): void
+  # updateSubmitButton(): void
+  + setSubmitButtonDisabled(disabled: boolean): void
+  + getSubmitButton(): HTMLButtonElement | null
+  + getForm(): HTMLFormElement
+  {abstract} # validate(): boolean
+  {abstract} # handleSubmit(): void
+}
+
+class EventEmitter implements IEvents {
+  - _events: Map<EventName, Set<Subscriber>>
+  + constructor()
+  + on<T>(eventName: EventName, callback: (event: T) => void): void
+  + off(eventName: EventName, callback: Subscriber): void
+  + emit<T>(eventName: string, data?: T): void
+  + onAll(callback: (event: EmitterEvent) => void): void
+  + offAll(): void
+  + trigger<T>(eventName: string, context?: Partial<T>): (event: object) => void
+}
+
+' Карточки
+ABSTRACT class Card implements ICard {
+  # container: HTMLElement
+  # title: HTMLElement
+  # price: HTMLElement
+  # image: HTMLImageElement | null
+  # category: HTMLElement | null
+  # constructor(template: HTMLTemplateElement | string)
+  + render(product: IProduct): void
+  + getContainer(): HTMLElement
+}
+
+class CardProduct extends Card implements ICard {
+  + constructor()
+  + render(product: IProduct): void
+}
+
+class CardBasket extends Card implements ICardBasket {
+  # itemIndex: HTMLElement
+  # deleteButton: HTMLElement
+  # onDeleteCallback: ((itemId: string) => void) | null
+  + constructor()
+  + setOnDeleteCallback(callback: (itemId: string) => void): void
+  + render(product: IProduct, index?: number): void
+  # handleDeleteClick(evt: MouseEvent): void
+}
+
+class CardPreview extends Card implements ICardPreview {
+  # description: HTMLElement
+  # button: HTMLButtonElement
+  + constructor()
+  + render(product: IProduct, inCart?: boolean): void
+}
+
+class CardFactory implements ICardFactory {
+  + createProductCard(): ICard
+  + createPreviewCard(): ICardPreview
+  + createBasketCard(): ICardBasket
+}
+
+' Модели
+class ModelProduct implements IModelProduct {
+  # products: IProduct[]
+  # itemsCount: number
+  + constructor(initialProducts?: IProduct[])
+  + setProducts(products: IProduct[]): void
+  + getProducts(): IProduct[]
+  + getProductById(id: string): IProduct | undefined
+  + getProductsCount(): number
+}
+
+class ModelCart implements IModelCart {
+  # cartData: ICart
+  + init(cartData: ICart): void
+  + addItem(item: IProduct): void
+  + removeItem(itemId: string): void
+  + clearCart(): void
+  + getTotalPrice(): number
+  + getItemsCount(): number
+  + getItems(): IProduct[]
+  + getItemById(id: string): IProduct | null
+  + getCartData(): ICart
+}
+
+class ModelOrder implements IModelOrder {
+  # orderData: IOrder
+  + setItems(items: string[]): void
+  + setPaymentMethod(method: PaymentMethod): void
+  + setEmail(email: string): void
+  + setPhone(phone: string): void
+  + setAddress(address: string): void
+  + setTotal(total: number): void
+  + clearData(): void
+  + getOrderData(): IOrder
+}
+
+' Представления
+class ViewProductList extends View<IProduct[]> implements IViewProductList {
+  # onProductClickCallback: ((productId: string) => void) | null
+  # renderData: HTMLElement[] | null
+  + constructor()
+  + setOnProductClickCallback(callback: (productId: string) => void): void
+  + update(products: IProduct[], cards?: HTMLElement[]): void
+  + render(): void
+}
+
+class ViewProductModal extends ViewModal<IProduct> implements IViewProductModal {
+  # onAddToCartCallback: ((product: IProduct) => void) | null
+  + constructor(modalContainer?: HTMLElement | string)
+  + setOnAddToCartCallback(callback: (product: IProduct) => void): void
+  + setInCartState(inCart: boolean): void
+  + update(product: IProduct, content?: HTMLElement): void
+  # clickAddToCartEvent(evt: MouseEvent): void
+  # setupCustomEventListeners(): void
+  # removeCustomEventListeners(): void
+  + render(): void
+}
+
+class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
+  # cartTemplate: HTMLTemplateElement | null
+  # cartButton: HTMLElement | null
+  # cartCount: HTMLElement | null
+  # onOrderCallback: () => void | null
+  + constructor(modalContainer: HTMLElement | string)
+  + setOnOrderCallback(callback: () => void): void
+  + update(cartData: ICart, cards?: ICardBasket[]): void
+  # createModalContent(cartData: ICart, cards: ICardBasket[]): HTMLElement
+  # clickToCartEvent(evt: MouseEvent): void
+  # setupCustomEventListeners(): void
+  # removeCustomEventListeners(): void
+  + render(): void
+}
+
+class ViewOrderModal extends ViewModal<IOrder> implements IViewOrderModal {
+  + constructor(modalContainer?: HTMLElement | string)
+  + update(orderData: IOrder, content?: HTMLElement): void
+  + render(): void
+}
+
+' Формы
+class OrderStep1Form extends Form implements IOrderStep1Form {
+  - selectedPayment: PaymentMethod | null
+  - addressInput: HTMLInputElement | null
+  - buttonsContainer: HTMLElement | null
+  - payButtons: HTMLButtonElement[]
+  - defaultPayment: PaymentMethod
+  - submitHandler: IOrderStep1SubmitHandler
+  - readonly ACTIVE_CLASS: string
+  + constructor(form: HTMLFormElement, defaultPayment: PaymentMethod, submitHandler: IOrderStep1SubmitHandler)
+  + getSubmitButton(): HTMLButtonElement | null
+  # init(): void
+  # setupPaymentButtons(): void
+  # validate(): boolean
+  # handleSubmit(): void
+}
+
+class OrderStep2Form extends Form implements IOrderStep2Form {
+  - emailInput: HTMLInputElement | null
+  - phoneInput: HTMLInputElement | null
+  - submitHandler: IOrderStep2SubmitHandler
+  - emailValidator: IValidator
+  - phoneValidator: IValidator
+  + constructor(form: HTMLFormElement, submitHandler: IOrderStep2SubmitHandler, emailValidator: IValidator, phoneValidator: IValidator)
+  + getSubmitButton(): HTMLButtonElement | null
+  # init(): void
+  # validate(): boolean
+  # handleSubmit(): void
+}
+
+class OrderStep1FormFactory implements IOrderStep1FormFactory {
+  + create(form: HTMLFormElement, defaultPayment: PaymentMethod, submitHandler: IOrderStep1SubmitHandler): IOrderStep1Form
+}
+
+class OrderStep2FormFactory implements IOrderStep2FormFactory {
+  + create(form: HTMLFormElement, submitHandler: IOrderStep2SubmitHandler, emailValidator: IValidator, phoneValidator: IValidator): IOrderStep2Form
+}
+
+' Презентеры
+class PresenterProduct {
+  # model: IModelProduct
+  # viewList: IViewProductList
+  # viewModal: IViewProductModal
+  # events: IEvents
+  # cardFactory: ICardFactory
+  + constructor(model: IModelProduct, viewList: IViewProductList, viewModal: IViewProductModal, events: IEvents, cardFactory: ICardFactory)
+  + init(): void
+  # initList(): void
+  # initModal(): void
+  # createCards(products: IProduct[]): HTMLElement[]
+  # createContent(product: IProduct, inCart: boolean): HTMLElement
+  + checkInCart(productId: string): Promise<boolean>
+  + closeModal(): void
+  + openModal(): void
+}
+
+class PresenterCart {
+  # model: IModelCart
+  # view: IViewCartModal
+  # events: IEvents
+  # cardFactory: ICardFactory
+  + constructor(model: IModelCart, view: IViewCartModal, events: IEvents, cardFactory: ICardFactory)
+  + init(): void
+  + closeModal(): void
+  + openModal(): void
+  # createCards(items: IProduct[]): ICardBasket[]
+}
+
+class PresenterOrder {
+  - model: IModelOrder
+  - api: IAppApi
+  - view: IViewOrderModal
+  - events: IEvents
+  - successMessageFactory: ISuccessMessageFactory
+  - orderStep1FormFactory: IOrderStep1FormFactory
+  - orderStep2FormFactory: IOrderStep2FormFactory
+  # currentStep: OrderStep
+  # orderId: string | null
+  # orderErrorMessage: string | null
+  # step2SubmitButton: HTMLButtonElement | null
+  # step2SubmitDefaultText: string
+  # orderTemplate: HTMLTemplateElement | null
+  # orderContactsTemplate: HTMLTemplateElement | null
+  # orderErrorTemplate: HTMLTemplateElement | null
+  + constructor(model: IModelOrder, api: IAppApi, view: IViewOrderModal, events: IEvents, successMessageFactory: ISuccessMessageFactory, orderStep1FormFactory: IOrderStep1FormFactory, orderStep2FormFactory: IOrderStep2FormFactory)
+  + init(): void
+  # submitOrder(): Promise<void>
+  # updateStep2Loading(isLoading: boolean): void
+  + openModal(): void
+  + closeModal(): void
+  # goToStep(step: OrderStep, orderData?: IOrder): void
+  # createStepContent(step: OrderStep, orderData: IOrder): HTMLElement
+  # createStep1Content(orderData: IOrder): HTMLElement
+  # createStep2Content(orderData: IOrder): HTMLElement
+  # createStep3Content(orderData: IOrder): HTMLElement
+  # createStep4Content(): HTMLElement
+}
+
+' API и состояние
+class AppApi extends Api implements IAppApi {
+  + constructor(baseUrl: string, options?: RequestInit)
+  + getProducts(): Promise<IProduct[]>
+  + getProductById(id: string): Promise<IProduct>
+  + postOrder(order: IOrder): Promise<IPostOrderResponse>
+}
+
+class AppState implements IAppState {
+  # modelProduct: IModelProduct
+  # modelCart: IModelCart
+  # modelOrder: IModelOrder
+  # events: IEvents
+  # api: IAppApi
+  # openedModal: string | null
+  + constructor(modelProduct: IModelProduct, modelCart: IModelCart, modelOrder: IModelOrder, events: IEvents, api: IAppApi)
+  + init(): Promise<void>
+  # loadProducts(): Promise<void>
+  # loadCart(): void
+}
+
+class SuccessMessage implements ISuccessMessage {
+  # template: HTMLTemplateElement | null
+  # container: HTMLElement
+  # title: HTMLElement | null
+  # orderId: HTMLElement | null
+  # description: HTMLElement | null
+  # closeButton: HTMLButtonElement | null
+  + constructor()
+  + setOrderData(orderId: string, total: number): void
+  + setOnCloseCallback(callback: () => void): void
+  + getContainer(): HTMLElement
+}
+
+class SuccessMessageFactory implements ISuccessMessageFactory {
+  + create(): ISuccessMessage
+}
+
+' ==========================================
+' СВЯЗИ НАСЛЕДОВАНИЯ (extends)
+' ==========================================
+ViewModal --|> View
+ViewProductList --|> View
+ViewProductModal --|> ViewModal
+ViewCartModal --|> ViewModal
+ViewOrderModal --|> ViewModal
+CardProduct --|> Card
+CardBasket --|> Card
+CardPreview --|> Card
+AppApi --|> Api
+OrderStep1Form --|> Form
+OrderStep2Form --|> Form
+
+' ==========================================
+' СВЯЗИ РЕАЛИЗАЦИИ ИНТЕРФЕЙСОВ (implements)
+' ==========================================
+View ..|> IView
+ViewModal ..|> IViewModal
+EventEmitter ..|> IEvents
+AppApi ..|> IAppApi
+AppState ..|> IAppState
+Card ..|> ICard
+CardProduct ..|> ICard
+CardBasket ..|> ICardBasket
+CardPreview ..|> ICardPreview
+CardFactory ..|> ICardFactory
+ModelProduct ..|> IModelProduct
+ModelCart ..|> IModelCart
+ModelOrder ..|> IModelOrder
+ViewProductList ..|> IViewProductList
+ViewProductModal ..|> IViewProductModal
+ViewCartModal ..|> IViewCartModal
+ViewOrderModal ..|> IViewOrderModal
+SuccessMessage ..|> ISuccessMessage
+SuccessMessageFactory ..|> ISuccessMessageFactory
+OrderStep1Form ..|> IOrderStep1Form
+OrderStep2Form ..|> IOrderStep2Form
+OrderStep1FormFactory ..|> IOrderStep1FormFactory
+OrderStep2FormFactory ..|> IOrderStep2FormFactory
+
+' ==========================================
+' СВЯЗИ РАСШИРЕНИЯ ИНТЕРФЕЙСОВ
+' ==========================================
+IViewModal --|> IView
+ICardBasket --|> ICard
+ICardPreview --|> ICard
+IViewProductList --|> IView
+IViewProductModal --|> IViewModal
+IViewCartModal --|> IViewModal
+IViewOrderModal --|> IViewModal
+
+' ==========================================
+' КОМПОЗИЦИЯ (composition) - сильная связь
+' Ромб закрашенный на стороне контейнера
+' ==========================================
+PresenterProduct *-- ModelProduct : "содержит"
+PresenterProduct *-- ViewProductList : "содержит"
+PresenterProduct *-- ViewProductModal : "содержит"
+PresenterProduct *-- EventEmitter : "содержит"
+PresenterProduct *-- CardFactory : "содержит"
+
+PresenterCart *-- ModelCart : "содержит"
+PresenterCart *-- ViewCartModal : "содержит"
+PresenterCart *-- EventEmitter : "содержит"
+PresenterCart *-- CardFactory : "содержит"
+
+PresenterOrder *-- ModelOrder : "содержит"
+PresenterOrder *-- AppApi : "содержит"
+PresenterOrder *-- ViewOrderModal : "содержит"
+PresenterOrder *-- EventEmitter : "содержит"
+PresenterOrder *-- SuccessMessageFactory : "содержит"
+PresenterOrder *-- OrderStep1FormFactory : "содержит"
+PresenterOrder *-- OrderStep2FormFactory : "содержит"
+
+AppState *-- ModelProduct : "содержит"
+AppState *-- ModelCart : "содержит"
+AppState *-- ModelOrder : "содержит"
+AppState *-- EventEmitter : "содержит"
+AppState *-- AppApi : "содержит"
+
+ViewModal *-- View : "содержит"
+
+' ==========================================
+' АГРЕГАЦИЯ (aggregation) - слабая связь
+' Ромб пустой на стороне контейнера
+' ==========================================
+CardFactory o-- CardProduct : "создаёт"
+CardFactory o-- CardPreview : "создаёт"
+CardFactory o-- CardBasket : "создаёт"
+
+SuccessMessageFactory o-- SuccessMessage : "создаёт"
+
+OrderStep1FormFactory o-- OrderStep1Form : "создаёт"
+OrderStep2FormFactory o-- OrderStep2Form : "создаёт"
+
+' ==========================================
+' АССОЦИАЦИЯ (association) - использование
+' Обычная стрелка
+' ==========================================
+PresenterProduct --> IModelProduct : "использует"
+PresenterProduct --> IViewProductList : "использует"
+PresenterProduct --> IViewProductModal : "использует"
+PresenterProduct --> IEvents : "использует"
+PresenterProduct --> ICardFactory : "использует"
+PresenterProduct --> IProduct : "работает с"
+
+PresenterCart --> IModelCart : "использует"
+PresenterCart --> IViewCartModal : "использует"
+PresenterCart --> IEvents : "использует"
+PresenterCart --> ICardFactory : "использует"
+PresenterCart --> ICardBasket : "использует"
+PresenterCart --> IProduct : "работает с"
+
+PresenterOrder --> IModelOrder : "использует"
+PresenterOrder --> IAppApi : "использует"
+PresenterOrder --> IViewOrderModal : "использует"
+PresenterOrder --> IEvents : "использует"
+PresenterOrder --> ISuccessMessageFactory : "использует"
+PresenterOrder --> IOrderStep1FormFactory : "использует"
+PresenterOrder --> IOrderStep2FormFactory : "использует"
+PresenterOrder --> IOrder : "работает с"
+PresenterOrder --> IOrderStep1SubmitHandler : "использует"
+PresenterOrder --> IOrderStep2SubmitHandler : "использует"
+PresenterOrder --> IValidator : "использует"
+
+AppState --> IModelProduct : "использует"
+AppState --> IModelCart : "использует"
+AppState --> IModelOrder : "использует"
+AppState --> IEvents : "использует"
+AppState --> IAppApi : "использует"
+AppState --> IProduct : "работает с"
+
+ModelProduct --> IProduct : "хранит"
+ModelCart --> ICart : "хранит"
+ModelCart --> IProduct : "хранит"
+ModelOrder --> IOrder : "хранит"
+
+ViewProductList --> IProduct : "отображает"
+ViewProductModal --> IProduct : "отображает"
+ViewCartModal --> ICart : "отображает"
+ViewCartModal --> ICardBasket : "отображает"
+ViewOrderModal --> IOrder : "отображает"
+
+Card --> IProduct : "отображает"
+CardProduct --> IProduct : "отображает"
+CardBasket --> IProduct : "отображает"
+CardPreview --> IProduct : "отображает"
+
+AppApi --> IProduct : "получает"
+AppApi --> IOrder : "отправляет"
+AppApi --> IPostOrderResponse : "получает"
+
+OrderStep1Form --> IOrderStep1SubmitHandler : "использует"
+OrderStep2Form --> IOrderStep2SubmitHandler : "использует"
+OrderStep2Form --> IValidator : "использует"
+OrderStep1FormFactory --> IOrderStep1Form : "создаёт"
+OrderStep1FormFactory --> PaymentMethod : "использует"
+OrderStep1FormFactory --> IOrderStep1SubmitHandler : "использует"
+OrderStep2FormFactory --> IOrderStep2Form : "создаёт"
+OrderStep2FormFactory --> IOrderStep2SubmitHandler : "использует"
+OrderStep2FormFactory --> IValidator : "использует"
+
+' ==========================================
+' ЗАВИСИМОСТИ ОТ ТИПОВ ДАННЫХ
+' ==========================================
+ICard --> IProduct
+ICardBasket --> IProduct
+ICardPreview --> IProduct
+ICart --> IProduct
+IModelProduct --> IProduct
+IModelCart --> IProduct
+IModelCart --> ICart
+IViewProductList --> IProduct
+IViewProductModal --> IProduct
+IViewCartModal --> ICart
+IViewCartModal --> ICardBasket
+IViewOrderModal --> IOrder
+IAppApi --> IProduct
+IAppApi --> IOrder
+IAppApi --> IPostOrderResponse
+ISuccessMessageFactory --> ISuccessMessage
+IOrderStep1FormFactory --> IOrderStep1Form
+IOrderStep1FormFactory --> PaymentMethod
+IOrderStep1FormFactory --> IOrderStep1SubmitHandler
+IOrderStep2FormFactory --> IOrderStep2Form
+IOrderStep2FormFactory --> IOrderStep2SubmitHandler
+IOrderStep2FormFactory --> IValidator
+
+@enduml
+
+

@@ -1,11 +1,11 @@
 import { Form } from '../../base/form';
-import { IOrderStep2SubmitHandler, IValidator } from '../../../types';
+import { IOrderStep2SubmitHandler, IValidator, IOrderStep2Form } from '../../../types';
 import { SELECTORS, ATTRIBUTES } from '../../../utils/constants';
 
 /**
  * Класс формы второго шага заказа (контакты)
  */
-export class OrderStep2Form extends Form {
+export class OrderStep2Form extends Form implements IOrderStep2Form {
 	private emailInput: HTMLInputElement | null = null;
 	private phoneInput: HTMLInputElement | null = null;
 	private submitHandler: IOrderStep2SubmitHandler;

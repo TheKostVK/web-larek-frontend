@@ -14,6 +14,9 @@ import ModelOrder from './components/order/model/modelOreder';
 import PresenterOrder from './components/order/presenter/presenterOrder';
 import ViewOrderModal from './components/order/view/viewOrderModal';
 import AppState from './components/appState/appState';
+import { SuccessMessageFactory } from './components/messages/successMessageFactory';
+import { OrderStep1FormFactory } from './components/order/forms/orderStep1FormFactory';
+import { OrderStep2FormFactory } from './components/order/forms/orderStep2FormFactory';
 
 const events = new EventEmitter();
 const cardFactory = new CardFactory();
@@ -31,7 +34,10 @@ const presenterCart = new PresenterCart(modelCart, viewCartModal, events, cardFa
 
 const modelOrder = new ModelOrder();
 const viewOrder = new ViewOrderModal(SELECTORS.IDS.MODAL_CONTAINER);
-const presenterOrder = new PresenterOrder(modelOrder, api, viewOrder, events);
+const successMessageFactory = new SuccessMessageFactory();
+const orderStep1FormFactory = new OrderStep1FormFactory();
+const orderStep2FormFactory = new OrderStep2FormFactory();
+const presenterOrder = new PresenterOrder(modelOrder, api, viewOrder, events, successMessageFactory, orderStep1FormFactory, orderStep2FormFactory);
 
 const appState = new AppState(modelProduct, modelCart, modelOrder, events, api);
 

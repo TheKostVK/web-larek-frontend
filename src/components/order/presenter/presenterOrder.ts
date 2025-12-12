@@ -8,6 +8,9 @@ import {
 	IProduct,
 	IValidator,
 	IViewOrderModal,
+	ISuccessMessageFactory,
+	IOrderStep1FormFactory,
+	IOrderStep2FormFactory,
 	OrderStep,
 } from '../../../types';
 import { IEvents } from '../../base/events';
@@ -22,8 +25,6 @@ import {
 	SYSTEM_NAME_SPACE,
 } from '../../../utils/constants';
 import { cloneTemplate, isCart } from '../../../utils/utils';
-import { OrderStep1Form, OrderStep2Form } from '../forms';
-import { SuccessMessage } from '../../messages/successMessage';
 
 class PresenterOrder {
 	protected currentStep: OrderStep = DEFAULT_ORDER_STEP;
@@ -41,6 +42,9 @@ class PresenterOrder {
 		private readonly api: IAppApi,
 		private readonly view: IViewOrderModal,
 		private readonly events: IEvents,
+		private readonly successMessageFactory: ISuccessMessageFactory,
+		private readonly orderStep1FormFactory: IOrderStep1FormFactory,
+		private readonly orderStep2FormFactory: IOrderStep2FormFactory,
 	) {}
 
 	public init(): void {
@@ -166,7 +170,7 @@ class PresenterOrder {
 			},
 		};
 
-		new OrderStep1Form(form, orderData.payment, submitHandler);
+		this.orderStep1FormFactory.create(form, orderData.payment, submitHandler);
 
 		return form;
 	}
@@ -212,7 +216,7 @@ class PresenterOrder {
 			},
 		};
 
-		const formInstance = new OrderStep2Form(form, submitHandler, emailValidator, phoneValidator);
+		const formInstance = this.orderStep2FormFactory.create(form, submitHandler, emailValidator, phoneValidator);
 
 		const submitButton = formInstance.getSubmitButton();
 		this.step2SubmitButton = submitButton;
@@ -224,7 +228,7 @@ class PresenterOrder {
 	}
 
 	protected createStep3Content(orderData: IOrder): HTMLElement {
-		const successMessage = new SuccessMessage();
+		const successMessage = this.successMessageFactory.create();
 
 		if (this.orderId) {
 			successMessage.setOrderData(this.orderId, orderData.total);

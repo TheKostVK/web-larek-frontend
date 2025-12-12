@@ -1,10 +1,11 @@
 import { cloneTemplate } from '../../utils/utils';
 import { SELECTORS } from '../../utils/constants';
+import { ISuccessMessage } from '../../types/components/messages/successMessage.interface';
 
 /**
  * Класс для отображения успешного сообщения о заказе
  */
-export class SuccessMessage {
+export class SuccessMessage implements ISuccessMessage {
 	protected template: HTMLTemplateElement | null = document.querySelector(SELECTORS.IDS.SUCCESS);
 	protected container: HTMLElement;
 	protected title: HTMLElement | null = null;
