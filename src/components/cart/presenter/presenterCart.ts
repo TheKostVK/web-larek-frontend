@@ -31,6 +31,7 @@ class PresenterCart {
 	public init(): void {
 		this.view.setOnOpenModalCallback(this.openModal);
 		this.view.setOnCloseModalCallback(this.closeModal);
+		this.view.setOnBasketButtonClickCallback(this.openModal);
 		this.view.setOnOrderCallback(() => {
 			const cartData = this.model.getCartData();
 			this.model.clearCart();

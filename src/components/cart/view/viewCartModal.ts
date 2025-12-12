@@ -11,6 +11,7 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 	protected cartButton: HTMLElement | null = null;
 	protected cartCount: HTMLElement | null = null;
 	protected onOrderCallback: () => void | null = null;
+	protected onBasketButtonClickCallback: () => void | null = null;
 
 	/**
 	 * Конструктор класса ViewCartModal
@@ -25,14 +26,27 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
 
 		this.cartButton = ensureElement(SELECTORS.HEADER.BASKET);
 		this.cartCount = ensureElement(SELECTORS.HEADER.BASKET_COUNTER, this.cartButton);
-
-		this.cartButton.addEventListener('click', () => {
-			this.onOpenModalCallback();
-		});
 	}
 
 	public setOnOrderCallback(callback: () => void): void {
 		this.onOrderCallback = callback;
+	}
+
+	public setOnBasketButtonClickCallback(callback: () => void): void {
+		if (typeof callback !== 'function') {
+			return;
+		}
+
+		this.onBasketButtonClickCallback = callback;
+
+		if (this.cartButton && !this.cartButton.hasAttribute('data-listener-attached')) {
+			this.cartButton.addEventListener('click', () => {
+				if (this.onBasketButtonClickCallback) {
+					this.onBasketButtonClickCallback();
+				}
+			});
+			this.cartButton.setAttribute('data-listener-attached', 'true');
+		}
 	}
 
 	public update(cartData: ICart, cards?: ICardBasket[]): void {

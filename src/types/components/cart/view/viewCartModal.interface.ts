@@ -12,6 +12,11 @@ export interface IViewCartModal extends IViewModal<ICart> {
 	setOnOrderCallback(callback: () => void): void;
 
 	/**
+	 * Устанавливает колбэк на клик по кнопке корзины в хедере
+	 */
+	setOnBasketButtonClickCallback(callback: () => void): void;
+
+	/**
 	 * Обновляет отображение корзины по актуальным данным
 	 * @param cartData объект корзины
 	 * @param cards опциональный массив готовых карточек товаров

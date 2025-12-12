@@ -116,6 +116,7 @@ INTERFACE IViewProductModal extends IViewModal<IProduct> {
 
 INTERFACE IViewCartModal extends IViewModal<ICart> {
   + setOnOrderCallback(callback: () => void): void
+  + setOnBasketButtonClickCallback(callback: () => void): void
   + update(cartData: ICart, cards?: ICardBasket[]): void
 }
 
@@ -359,8 +360,10 @@ class ViewCartModal extends ViewModal<ICart> implements IViewCartModal {
   # cartButton: HTMLElement | null
   # cartCount: HTMLElement | null
   # onOrderCallback: () => void | null
+  # onBasketButtonClickCallback: () => void | null
   + constructor(modalContainer: HTMLElement | string)
   + setOnOrderCallback(callback: () => void): void
+  + setOnBasketButtonClickCallback(callback: () => void): void
   + update(cartData: ICart, cards?: ICardBasket[]): void
   # createModalContent(cartData: ICart, cards: ICardBasket[]): HTMLElement
   # clickToCartEvent(evt: MouseEvent): void

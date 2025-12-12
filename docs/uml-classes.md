@@ -689,6 +689,7 @@
 # cartButton: HTMLElement | null
 # cartCount: HTMLElement | null
 # onOrderCallback: () => void | null
+# onBasketButtonClickCallback: () => void | null
 ```
 
 **Конструктор:**
@@ -698,6 +699,7 @@
 ```
 + constructor(modalContainer: HTMLElement | string)
 + setOnOrderCallback(callback: () => void): void
++ setOnBasketButtonClickCallback(callback: () => void): void
 + update(cartData: ICart, cards?: ICardBasket[]): void
 # createModalContent(cartData: ICart, cards: ICardBasket[]): HTMLElement
 # clickToCartEvent(evt: MouseEvent): void
@@ -1272,6 +1274,7 @@
 **Методы:**
 ```
 + setOnOrderCallback(callback: () => void): void
++ setOnBasketButtonClickCallback(callback: () => void): void
 + update(cartData: ICart, cards?: ICardBasket[]): void
 ```
 

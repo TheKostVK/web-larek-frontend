@@ -59,12 +59,10 @@ class PresenterOrder {
 			this.model.setItems(items);
 			this.model.setTotal(cartData.totalPrice);
 
-			this.openModal();
-
 			const orderData = this.model.getOrderData();
 			this.goToStep(DEFAULT_ORDER_STEP, orderData);
 
-			this.events.emit(SYSTEM_EVENTS.MODAL_OPEN, { modalName: SYSTEM_NAME_SPACE.ORDER_MODAL });
+			this.openModal();
 		});
 	}
 
