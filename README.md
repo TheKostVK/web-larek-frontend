@@ -127,7 +127,9 @@ src/
     index.html                # Главная страница
 
 docs/                        # Документация
-  web-ларёк UML-схема.jpg    # UML-схема (JPEG)
+  uml-classes.md             # Описание UML-классов
+  uml-diagram.png           # UML-диаграмма (PNG)
+  uml-diagram.puml          # Исходный файл PlantUML
   web-ларёк UML-схема.png    # UML-схема (PNG)
   web-ларёк UML-схема.pdf    # UML-схема (PDF)
 ```
@@ -149,6 +151,7 @@ docs/                        # Документация
 - `web-ларёк UML-схема.pdf` — версия в формате PDF без сжатия
 - `uml-diagram.png` — диаграмма, сгенерированная из `uml-diagram.puml`
 - `uml-diagram.puml` — исходный файл PlantUML для генерации диаграммы
+- `uml-classes.md` — описание UML-классов
 
 ---
 
@@ -1242,7 +1245,7 @@ npm run start
 yarn start
 ```
 
-Приложение будет доступно по адресу `http://localhost:9000` (или другому порту, указанному в конфигурации).
+Приложение будет доступно по адресу `http://localhost:8080` (или другому порту, указанному в конфигурации webpack-dev-server).
 
 ### Сборка проекта
 
